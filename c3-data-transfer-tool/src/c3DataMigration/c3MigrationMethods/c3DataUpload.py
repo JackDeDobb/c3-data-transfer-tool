@@ -16,6 +16,13 @@ from c3DataMigration.c3Helpers import c3Request
 
 
 def _zipImportFiles (r, p):
+  existingGZipFilePaths = []
+  for dataType in p.dataTypeImports:
+    c3Type = dataType[0]
+    dataTypeUploadFolder = '/'.join([p.dataUploadFolder, c3Type])
+    existingGZipFilePaths.extend(c3FileSystem.getLocalFilePathsWithinDirectory(dataTypeUploadFolder, '.gz'))
+  c3FileSystem.deleteLocalFiles(existingGZipFilePaths)
+
   c3FileSystem.zipFilesInDirectory(r, p, p.dataUploadFolder, p.dataTypeImports)
   for dataType in p.dataTypeImports:
     c3Type = dataType[0]
