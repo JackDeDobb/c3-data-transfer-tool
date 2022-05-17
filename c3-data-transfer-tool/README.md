@@ -171,12 +171,12 @@ if __name__ == '__main__':
   environmentArguments = c3DataTransfer.parseEnvironmentArguments()
 
   dataTypeImports = [
-    ['BusinessChangeRule',     { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
-    ['ConsumptionForecastRun', { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
-    ['Item',                   { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
-    ['Facility',               { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
-    ['NewCustomerRule',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
-    ['NonTypicalOrder',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': False, 'disableDownstreamOnRemove': False }],
+    ['BusinessChangeRule',     { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['ConsumptionForecastRun', { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['Item',                   { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['Facility',               { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['NewCustomerRule',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['NonTypicalOrder',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
   ]
 
   c3DataTransfer.uploadDataToC3Env(
