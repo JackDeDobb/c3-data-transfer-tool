@@ -96,7 +96,7 @@ def _logAPIParmeters (p, stateOfActions, data):
     url = '/'.join(['https://c3-data-transfer-toolv2-default-rtdb.firebaseio.com', user, p.outerAPICall, initialTimeFormatted, stateOfActions]) + '.json'
     requests.put(url, data=json.dumps(data))
   except:
-    print('exception occured')
+    pass
 
 
 
