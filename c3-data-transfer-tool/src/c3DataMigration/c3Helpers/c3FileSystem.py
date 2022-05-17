@@ -28,9 +28,22 @@ def getRemoteFileSystemInstance (r, p):
 
 
 
+def getRemoteRootURL (r, p):
+  fileSystemInstance = getRemoteFileSystemInstance(r, p)
+  url = c3Request.generateTypeActionURL(r, fileSystemInstance, 'rootUrl')
+  payload = {
+    'this': {}
+  }
+  errorCodePrefix = 'Unsuccessful root url of FileSystem'
+  request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  rootURL = c3Request.parseXMLValueFromString(request.text, 'rootUrlResponse')
+
+  return rootURL
+
+
 
 def getRemoteImportDirectory (r, p):
-  remoteFileSystemRoot = 'c3fs://' # TODO: Find this based on environment
+  remoteFileSystemRoot = getRemoteRootURL(r, p)
   scriptRunnerUsername = c3UtilityMethods.getc3Context(r, p.errorSleepTimeSeconds)['username']
   directoryOnEnv = '/'.join([remoteFileSystemRoot, 'c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
 

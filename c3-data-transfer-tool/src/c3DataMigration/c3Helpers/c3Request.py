@@ -24,6 +24,17 @@ def generateFileURL (r, c3FileSystemPath):
 
 
 
+def parseXMLValueFromString (xmlString, label):
+  retString = xmlString
+  retString = retString.replace('<' + label + ' version="2.0">', '')
+  retString = retString.replace('<' + label + ' version=2.0>', '')
+  retString = retString.replace('</' + label + '>', '')
+
+  return retString
+
+
+
+
 lastRefreshTime = 0
 def _refreshAuthToken (r):
   global lastRefreshTime
@@ -36,7 +47,7 @@ def _refreshAuthToken (r):
     elif (r.user and r.password):
       headers = { 'Content-type': 'application/json', 'Accept': 'application/json' }
       retVal = requests.post(url=url, headers=headers, auth=(r.user, r.password))
-    r.authToken = retVal.text.replace('"', '').replace('<generateC3AuthTokenResponse version=2.0>', '').replace('</generateC3AuthTokenResponse>', '')
+    r.authToken = parseXMLValueFromString(retVal.text.replace('"', ''), 'generateC3AuthTokenResponse')
     lastRefreshTime = time.time()
 
 

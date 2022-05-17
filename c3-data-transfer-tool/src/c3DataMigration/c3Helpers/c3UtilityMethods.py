@@ -76,7 +76,7 @@ def getc3Context (r, errorSleepTimeSeconds):
     try:
       c3Context = json.loads(json.loads(request.text))
     except:
-      retVal = request.text.replace('<execResponse version="2.0">', '').replace('</execResponse>', '')
+      retVal = c3Request.parseXMLValueFromString(request.text, 'execResponse')
       c3Context = json.loads(retVal)
 
   return c3Context
@@ -100,7 +100,7 @@ def enableQueues (r, errorSleepTimeSeconds, promptUser=False, listOfQueueNamesTo
     url = c3Request.generateTypeActionURL(r, queueName, 'isPaused')
     errorCodePrefix = 'Unsuccessful checking status of queue: ' + queueName
     request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, None, errorCodePrefix)
-    retVal = request.text.replace('"', '').replace('<isPausedResponse version=2.0>', '').replace('</isPausedResponse>', '')
+    retVal = c3Request.parseXMLValueFromString(request.text.replace('"', ''), 'isPausedResponse')
     if (retVal == 'true'):
       queueNamesToEnable.append(queueName)
 
@@ -129,7 +129,7 @@ def fetchCountOnType (r, errorSleepTimeSeconds, c3Type, filterString):
   errorCodePrefix = 'Unsuccessful fetchCount of type ' + c3Type
   request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
 
-  retVal = request.text.replace('"', '').replace('<fetchCountResponse version=2.0>', '').replace('</fetchCountResponse>', '')
+  retVal = c3Request.parseXMLValueFromString(request.text.replace('"', ''), 'fetchCountResponse')
   return int(retVal)
 
 
@@ -172,7 +172,7 @@ def retrieveLabeledFields (r, c3Type, errorSleepTimeSeconds):
     try:
       fieldTypes = json.loads(json.loads(request.text))
     except:
-      retVal = request.text.replace('<execResponse version="2.0">', '').replace('</execResponse>', '')
+      retVal = c3Request.parseXMLValueFromString(request.text, 'execResponse')
       fieldTypes = json.loads(retVal)
 
   return fieldTypes
