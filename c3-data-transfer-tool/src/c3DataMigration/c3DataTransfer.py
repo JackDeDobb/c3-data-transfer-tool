@@ -45,8 +45,8 @@ def parseEnvironmentArguments (sendDeveloperData=True):
     sendDeveloperData = sendDeveloperData,
     outerAPICall      = 'parseArgsAPI'
   )
-  c3UsageStats.parseArgsAPI.logStart(r, p)
-  c3UsageStats.parseArgsAPI.logFinish(p)
+  c3UsageStats.ParseArgsAPI.logStart(r, p)
+  c3UsageStats.ParseArgsAPI.logFinish(r, p)
 
   return r
 
@@ -62,7 +62,7 @@ def callC3TypeAction (environmentArguments, c3Type, action, payload, sendDevelop
     outerAPICall      = 'callC3TypeActionAPI'
   )
   c3UsageStats.callC3TypeActionAPI.logStart(environmentArguments, p, c3Type, action)
-  c3UsageStats.callC3TypeActionAPI.logFinish(p)
+  c3UsageStats.callC3TypeActionAPI.logFinish(r, p)
 
   return requestResponse
 
@@ -102,13 +102,13 @@ def uploadDataToC3Env (
     outerAPICall            = 'uploadAPI'
   )
 
-  c3UsageStats.uploadAPI.logStart(environmentArguments, p)
+  c3UsageStats.UploadAPI.logStart(environmentArguments, p)
   c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
   c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
   c3DataRemove.removeDataFromEnv(r, p)
   c3DataUpload.uploadDataToEnv(r, p)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeImports)
-  c3UsageStats.uploadAPI.logFinish(p)
+  c3UsageStats.UploadAPI.logFinish(r, p)
 
 
 
@@ -144,10 +144,10 @@ def downloadDataFromC3Env (
     outerAPICall             = 'downloadAPI'
   )
 
-  c3UsageStats.downloadAPI.logStart(environmentArguments, p)
+  c3UsageStats.DownloadAPI.logStart(environmentArguments, p)
   c3FileSystem.wipeLocalDirectory(dataDownloadFolder, p.promptUsersForWarnings)
   c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
   c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeExports)
   c3DataDownload.downloadDataFromEnv(r, p)
-  c3UsageStats.downloadAPI.logFinish(p)
+  c3UsageStats.DownloadAPI.logFinish(r, p)

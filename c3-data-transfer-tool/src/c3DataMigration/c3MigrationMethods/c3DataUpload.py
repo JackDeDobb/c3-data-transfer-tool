@@ -130,18 +130,18 @@ def uploadDataToEnv (r, p):
 
   c3UtilityMethods.printFormatExtraDashes('ZIPPING IMPORT FILES', p.maxColumnPrintLength, True)
   _zipImportFiles(r, p)
-  c3UsageStats.uploadAPI.logZipFiles(p)
+  c3UsageStats.UploadAPI.logZipFiles(r, p)
 
   c3UtilityMethods.printFormatExtraDashes('CURLING UP IMPORT FILES', p.maxColumnPrintLength, True)
   _postImportFiles(r, p)
-  c3UsageStats.uploadAPI.logCurlFiles(p)
+  c3UsageStats.UploadAPI.logCurlFiles(r, p)
 
   c3UtilityMethods.printFormatExtraDashes('UPLOADING DATA TO THE ENV', p.maxColumnPrintLength, True)
   c3TypeToBatchJobMapping = _startDataUploadToEnv(r, p)
   _finishDataUploadToEnv(r, p, c3TypeToBatchJobMapping)
   _cleanUpZippedImportFiles(r, p)
-  c3UsageStats.uploadAPI.logBatchJob(p, c3TypeToBatchJobMapping)
+  c3UsageStats.UploadAPI.logBatchJob(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('GENERATING IMPORT QUEUE ERROR FILES', p.maxColumnPrintLength, True)
   c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, 'Import')
-  c3UsageStats.uploadAPI.logImportErrors(p, c3TypeToBatchJobMapping)
+  c3UsageStats.UploadAPI.logImportErrors(r, p, c3TypeToBatchJobMapping)

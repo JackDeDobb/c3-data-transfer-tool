@@ -94,59 +94,52 @@ def _logAPIParmeters (p, stateOfActions, data):
 
 
 
+def _logAPIStateAndAdditionalFields (r, p, state, additionalFieldsDict={}):
+  additionalFieldsDict = {} if (additionalFieldsDict == None) else additionalFieldsDict
+  defaultPostingFields = {
+    'environmentArguments': _omitSensitiveEnvironmentArguments(r),
+    'functionParams': _omitSensitiveFunctionParameters(p),
+    'state': state,
+  }
 
-class parseArgsAPI:
+  _logAPIParmeters(p, state, { **defaultPostingFields, **additionalFieldsDict })
+
+
+
+
+class BaseLoggingClass:
   @staticmethod
   def logStart (r, p):
-    state = '01_INITIAL'
-    _logAPIParmeters(p, state, {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'functionParams': _omitSensitiveFunctionParameters(p),
-      'state': state,
-    })
+    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', None)
 
   @staticmethod
-  def logFinish (p):
-    state = 'COMPLETE'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+  def logFinish (r, p):
+    _logAPIStateAndAdditionalFields(r, p, 'COMPLETE', None)
 
 
 
 
-class callC3TypeActionAPI:
+class ParseArgsAPI(BaseLoggingClass):
+  pass
+
+
+
+
+class callC3TypeActionAPI(BaseLoggingClass):
   @staticmethod
   def logStart (r, p, c3Type, action):
-    state = '01_INITIAL'
-    _logAPIParmeters(p, state, {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'functionParams': _omitSensitiveFunctionParameters(p),
+    additionalFields =  {
       'c3Type': c3Type,
       'action': action,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', additionalFields)
 
+
+
+
+class UploadAPI(BaseLoggingClass):
   @staticmethod
-  def logFinish (p):
-    state = 'COMPLETE'
-    _logAPIParmeters(p, 'COMPLETE', {
-      'state': state,
-    })
-
-
-
-
-class uploadAPI:
-  @staticmethod
-  def logStart (r, p):
-    state = '01_INITIAL'
-    _logAPIParmeters(p, state, {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'functionParams': _omitSensitiveFunctionParameters(p),
-      'state': state,
-    })
-
-  def logAPIRemove (p, c3TypeToBatchJobMapping):
+  def logAPIRemove (r, p, c3TypeToBatchJobMapping):
     c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
     for x in c3TypeToBatchJobMappingCopy:
       _removeFieldIfExists(x[1], 'outputFileCount')
@@ -154,112 +147,69 @@ class uploadAPI:
         x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
         _removeFieldIfExists(x[1], 'initialFetchCount')
         _removeFieldIfExists(x[1], 'currentFetchCount')
-
-    state = '02_REMOVE-COMPLETE'
-    _logAPIParmeters(p, state, {
+    additionalFields = {
       'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '02_REMOVE_COMPLETE', additionalFields)
 
   @staticmethod
-  def logZipFiles (p):
-    state = '03_ZIP_FILES'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+  def logZipFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '03_ZIP_FILES', None)
 
   @staticmethod
-  def logCurlFiles (p):
-    state = '04_CURL_FILES'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+  def logCurlFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES', None)
 
   @staticmethod
-  def logBatchJob (p, c3TypeToBatchJobMapping):
-    state = '05_BATCH_IMPORT'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+  def logBatchJob (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '05_BATCH_IMPORT', None)
 
   @staticmethod
-  def logImportErrors (p, c3TypeToBatchJobMapping):
-    state = '06_IMPORT_ERRORS'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+  def logImportErrors (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '06_IMPORT_ERRORS', None)
 
   @staticmethod
-  def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
+  def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
     c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
     for x in c3TypeToBatchJobMappingCopy:
       _removeFieldIfExists(x[1], 'outputFileCount')
 
-    state = '07_REFRESH_CALCS_COMPLETE'
-    _logAPIParmeters(p, state, {
+    additionalFields = {
       'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '07_REFRESH_CALCS_COMPLETE', additionalFields)
 
+
+
+
+class DownloadAPI(BaseLoggingClass):
   @staticmethod
-  def logFinish (p):
-    state = 'COMPLETE'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
-
-
-
-
-class downloadAPI:
-  @staticmethod
-  def logStart (r, p):
-    state = '01_INITIAL'
-    _logAPIParmeters(p, state, {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'functionParams': _omitSensitiveFunctionParameters(p),
-      'state': state,
-    })
-
-  @staticmethod
-  def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
+  def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
     c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
     for x in c3TypeToBatchJobMappingCopy:
       _removeFieldIfExists(x[1], 'outputFileCount')
-
-    state = '02_REFRESH_CALCS_COMPLETE'
-    _logAPIParmeters(p, state, {
+    additionalFields = {
       'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '02_REFRESH_CALCS_COMPLETE', additionalFields)
 
   @staticmethod
-  def logBatchJob (p, c3TypeToBatchJobMapping):
-    state = '03_BATCH_JOBS_COMPLETE'
-    _logAPIParmeters(p, state, {
+  def logBatchJob (r, p, c3TypeToBatchJobMapping):
+    additionalFields = {
       'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '03_BATCH_JOBS_COMPLETE', additionalFields)
 
   @staticmethod
-  def logCurlFiles (p, c3TypeToBatchJobMapping):
-    state = '04_CURL_FILES_COMPLETE'
-    _logAPIParmeters(p, state, {
+  def logCurlFiles (r, p, c3TypeToBatchJobMapping):
+    additionalFields = {
       'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES_COMPLETE', additionalFields)
 
   @staticmethod
-  def logExtractFiles (p, c3TypeToBatchJobMapping):
-    state = '05_EXTRACT_FILES_COMPLETE'
-    _logAPIParmeters(p, state, {
+  def logExtractFiles (r, p, c3TypeToBatchJobMapping):
+    additionalFields = {
       'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-      'state': state,
-    })
-
-  @staticmethod
-  def logFinish (p):
-    state = 'COMPLETE'
-    _logAPIParmeters(p, state, {
-      'state': state,
-    })
+    }
+    _logAPIStateAndAdditionalFields(r, p, '05_EXTRACT_FILES_COMPLETE', additionalFields)

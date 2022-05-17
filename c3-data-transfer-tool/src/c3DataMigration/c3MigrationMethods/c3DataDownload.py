@@ -130,16 +130,16 @@ def downloadDataFromEnv (r, p):
   c3UtilityMethods.printFormatExtraDashes('DOWNLOADING DATA FROM THE ENV', p.maxColumnPrintLength, True)
   c3TypeToBatchJobMapping = _startDataDownloadFromEnv(r, p)
   _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.downloadAPI.logBatchJob(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logBatchJob(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('CURLING DOWN GENERATED EXPORT FILES', p.maxColumnPrintLength, True)
   _fetchGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.downloadAPI.logCurlFiles(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logCurlFiles(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('EXTRACTING GENERATED EXPORT FILES', p.maxColumnPrintLength, True)
   _extractGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
   _cleanUpGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.downloadAPI.logExtractFiles(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logExtractFiles(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('SCANNING DOWNLOAD FOLDER INFO', p.maxColumnPrintLength, True)
   c3FileSystem.scanFilesInDirectory(p, p.dataTypeExports, p.dataDownloadFolder, True)
