@@ -45,8 +45,8 @@ def parseEnvironmentArguments (sendDeveloperData=True):
     sendDeveloperData = sendDeveloperData,
     outerAPICall      = 'parseArgsAPI'
   )
-  c3UsageStats.logParseArgsAPIParameters(r, p)
-  c3UsageStats.logCompletionOfAPI(p)
+  c3UsageStats.parseArgsAPI.logStart(r, p)
+  c3UsageStats.parseArgsAPI.logFinish(p)
 
   return r
 
@@ -61,8 +61,8 @@ def callC3TypeAction (environmentArguments, c3Type, action, payload, sendDevelop
     sendDeveloperData = sendDeveloperData,
     outerAPICall      = 'callC3TypeActionAPI'
   )
-  c3UsageStats.logCallC3TypeActionAPIParameters(environmentArguments, p, c3Type, action)
-  c3UsageStats.logCompletionOfAPI(p)
+  c3UsageStats.callC3TypeActionAPI.logStart(environmentArguments, p, c3Type, action)
+  c3UsageStats.callC3TypeActionAPI.logFinish(p)
 
   return requestResponse
 
@@ -102,13 +102,13 @@ def uploadDataToC3Env (
     outerAPICall            = 'uploadAPI'
   )
 
-  c3UsageStats.logUploadAPIParameters(environmentArguments, p)
+  c3UsageStats.uploadAPI.logStart(environmentArguments, p)
   c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
   c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
   c3DataRemove.removeDataFromEnv(r, p)
   c3DataUpload.uploadDataToEnv(r, p)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeImports)
-  c3UsageStats.logCompletionOfAPI(p)
+  c3UsageStats.uploadAPI.logFinish(p)
 
 
 
@@ -144,10 +144,10 @@ def downloadDataFromC3Env (
     outerAPICall             = 'downloadAPI'
   )
 
-  c3UsageStats.logDownloadAPIParameters(environmentArguments, p)
+  c3UsageStats.downloadAPI.logStart(environmentArguments, p)
   c3FileSystem.wipeLocalDirectory(dataDownloadFolder, p.promptUsersForWarnings)
   c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
   c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeExports)
   c3DataDownload.downloadDataFromEnv(r, p)
-  c3UsageStats.logCompletionOfAPI(p)
+  c3UsageStats.downloadAPI.logFinish(p)
