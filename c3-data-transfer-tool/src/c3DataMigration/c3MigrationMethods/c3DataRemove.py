@@ -104,4 +104,4 @@ def removeDataFromEnv (r, p):
   c3TypeToBatchJobMapping = _startDataRemoveFromEnv(r, p)
   _finishRemoveDataFromEnv(r, p, c3TypeToBatchJobMapping)
   _cleanUpAsyncRemoveActions(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.logAPIRemove(p, c3TypeToBatchJobMapping)
+  c3UsageStats.uploadAPI.logAPIRemove(p, c3TypeToBatchJobMapping)

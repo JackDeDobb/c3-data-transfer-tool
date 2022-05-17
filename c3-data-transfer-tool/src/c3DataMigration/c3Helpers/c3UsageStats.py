@@ -146,31 +146,58 @@ class uploadAPI:
       'state': state,
     })
 
+  def logAPIRemove (p, c3TypeToBatchJobMapping):
+    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
+    for x in c3TypeToBatchJobMappingCopy:
+      _removeFieldIfExists(x[1], 'outputFileCount')
+      if (('initialFetchCount' in x[1]) and ('currentFetchCount' in x[1])):
+        x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
+        _removeFieldIfExists(x[1], 'initialFetchCount')
+        _removeFieldIfExists(x[1], 'currentFetchCount')
+
+    state = '02_REMOVE-COMPLETE'
+    _logAPIParmeters(p, state, {
+      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
+      'state': state,
+    })
+
   @staticmethod
   def logZipFiles (p):
-    state = '02_ZIP_FILES'
+    state = '03_ZIP_FILES'
     _logAPIParmeters(p, state, {
       'state': state,
     })
 
   @staticmethod
   def logCurlFiles (p):
-    state = '03_CURL_FILES'
+    state = '04_CURL_FILES'
     _logAPIParmeters(p, state, {
       'state': state,
     })
 
   @staticmethod
   def logBatchJob (p, c3TypeToBatchJobMapping):
-    state = '04_BATCH_IMPORT'
+    state = '05_BATCH_IMPORT'
     _logAPIParmeters(p, state, {
       'state': state,
     })
 
   @staticmethod
   def logImportErrors (p, c3TypeToBatchJobMapping):
-    state = '05_IMPORT_ERRORS'
+    state = '06_IMPORT_ERRORS'
     _logAPIParmeters(p, state, {
+      'state': state,
+    })
+
+  @staticmethod
+  def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
+    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
+    for x in c3TypeToBatchJobMappingCopy:
+      _removeFieldIfExists(x[1], 'outputFileCount')
+
+    state = '07_REFRESH_CALCS_COMPLETE'
+    _logAPIParmeters(p, state, {
+      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
       'state': state,
     })
 
@@ -191,6 +218,18 @@ class downloadAPI:
     _logAPIParmeters(p, state, {
       'environmentArguments': _omitSensitiveEnvironmentArguments(r),
       'functionParams': _omitSensitiveFunctionParameters(p),
+      'state': state,
+    })
+
+  @staticmethod
+  def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
+    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
+    for x in c3TypeToBatchJobMappingCopy:
+      _removeFieldIfExists(x[1], 'outputFileCount')
+
+    state = '02_REFRESH_CALCS_COMPLETE'
+    _logAPIParmeters(p, state, {
+      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
       'state': state,
     })
 
@@ -224,35 +263,3 @@ class downloadAPI:
     _logAPIParmeters(p, state, {
       'state': state,
     })
-
-
-
-
-
-def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
-  c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-  for x in c3TypeToBatchJobMappingCopy:
-    _removeFieldIfExists(x[1], 'outputFileCount')
-
-  refreshCalcsPrefix = '02' if (p.outerFunctionAPI == 'downloadAPI') else '04'
-  state = refreshCalcsPrefix + '_REFRESH_CALCS_COMPLETE'
-  _logAPIParmeters(p, state, {
-    'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    'state': state,
-  })
-
-
-
-
-def logAPIRemove (p, c3TypeToBatchJobMapping):
-  c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-  for x in c3TypeToBatchJobMappingCopy:
-    _removeFieldIfExists(x[1], 'outputFileCount')
-    if (('initialFetchCount' in x[1]) and ('currentFetchCount' in x[1])):
-      x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
-      _removeFieldIfExists(x[1], 'initialFetchCount')
-      _removeFieldIfExists(x[1], 'currentFetchCount')
-
-  _logAPIParmeters(p, '02_REMOVE-COMPLETE', {
-    'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-  })
