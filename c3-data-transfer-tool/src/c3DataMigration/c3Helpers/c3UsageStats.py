@@ -77,10 +77,6 @@ def _cleanC3ToTypeToBatchJobMappingArrays (c3TypeToBatchJobMappingArray):
     _removeFieldIfExists(x[1], 'id')
     _removeFieldIfExists(x[1], 'filter')
     _removeFieldIfExists(x[1], 'fileUrls')
-    if ((not ('initialFetchCount' in x[1])) or (x[1]['initialFetchCount'] == None)):
-      _removeFieldIfExists(x[1], 'initialFetchCount')
-    if ((not ('currentFetchCount' in x[1])) or (x[1]['currentFetchCount'] == None)):
-      _removeFieldIfExists(x[1], 'currentFetchCount')
     _formatDatetimeIfExists(x[1], 'launchTime')
     _formatDatetimeIfExists(x[1], 'completionTime')
   
@@ -137,11 +133,10 @@ class ParseArgsAPI(BaseLoggingClass):
 class callC3TypeActionAPI(BaseLoggingClass):
   @staticmethod
   def logStart (r, p, c3Type, action):
-    additionalFields =  {
+    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', {
       'c3Type': c3Type,
       'action': action,
-    }
-    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', additionalFields)
+    })
 
 
 
@@ -156,10 +151,9 @@ class UploadAPI(BaseLoggingClass):
         x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
         _removeFieldIfExists(x[1], 'initialFetchCount')
         _removeFieldIfExists(x[1], 'currentFetchCount')
-    additionalFields = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIStateAndAdditionalFields(r, p, '02_REMOVE_COMPLETE', additionalFields)
+    _logAPIStateAndAdditionalFields(r, p, '02_REMOVE_COMPLETE', {
+      'removeBatchJob': c3TypeToBatchJobMappingCopy,
+    })
 
   @staticmethod
   def logZipFiles (r, p):
@@ -171,18 +165,21 @@ class UploadAPI(BaseLoggingClass):
 
   @staticmethod
   def logBatchJob (r, p, c3TypeToBatchJobMapping):
-    _logAPIStateAndAdditionalFields(r, p, '05_BATCH_IMPORT', None)
+    _logAPIStateAndAdditionalFields(r, p, '05_BATCH_IMPORT', {
+      'importBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
   @staticmethod
   def logImportErrors (r, p, c3TypeToBatchJobMapping):
-    _logAPIStateAndAdditionalFields(r, p, '06_IMPORT_ERRORS', None)
+    _logAPIStateAndAdditionalFields(r, p, '06_IMPORT_ERRORS', {
+      'importBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
   @staticmethod
   def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
-    additionalFields = {
-      'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-    }
-    _logAPIStateAndAdditionalFields(r, p, '07_REFRESH_CALCS_COMPLETE', additionalFields)
+    _logAPIStateAndAdditionalFields(r, p, '07_REFRESH_CALCS_COMPLETE', {
+      'refreshBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
 
 
@@ -193,32 +190,26 @@ class DownloadAPI(BaseLoggingClass):
     c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
     for x in c3TypeToBatchJobMappingCopy:
       _removeFieldIfExists(x[1], 'outputFileCount')
-    additionalFields = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIStateAndAdditionalFields(r, p, '02_REFRESH_CALCS_COMPLETE', additionalFields)
+    _logAPIStateAndAdditionalFields(r, p, '02_REFRESH_CALCS_COMPLETE', {
+      'refreshBatchJob': c3TypeToBatchJobMappingCopy,
+    })
 
   @staticmethod
   def logBatchJob (r, p, c3TypeToBatchJobMapping):
-    additionalFields = {
-      'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-    }
-    _logAPIStateAndAdditionalFields(r, p, '03_BATCH_JOBS_COMPLETE', additionalFields)
+    _logAPIStateAndAdditionalFields(r, p, '03_BATCH_JOBS_COMPLETE', {
+      'exportBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
   @staticmethod
-  def logCurlFiles (r, p, c3TypeToBatchJobMapping):
-    additionalFields = {
-      'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-    }
-    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES_COMPLETE', additionalFields)
+  def logCurlFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES_COMPLETE')
 
   @staticmethod
-  def logExtractFiles (r, p, c3TypeToBatchJobMapping):
-    additionalFields = {
-      'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
-    }
-    _logAPIStateAndAdditionalFields(r, p, '05_EXTRACT_FILES_COMPLETE', additionalFields)
+  def logExtractFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '05_EXTRACT_FILES_COMPLETE')
 
   @staticmethod
   def logExportErrors (r, p, c3TypeToBatchJobMapping):
-    _logAPIStateAndAdditionalFields(r, p, '06_EXPORT_ERRORS', None)
+    _logAPIStateAndAdditionalFields(r, p, '06_EXPORT_ERRORS', {
+      'exportBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
