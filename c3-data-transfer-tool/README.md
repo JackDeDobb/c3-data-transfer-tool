@@ -12,51 +12,54 @@ Note: We have 2 step process for transferring data:
 * c3DataTransfer.parseEnvironmentArguments()
     * Run python *pyScriptName*.py -h to see a list of parameters to call python script with.\
     You must include a call to c3DataTransfer.parseEnvironmentArguments() within script to see -h.
-    * sendDeveloperData = True: send usage statistics to better improve application
-
-* c3DataTransfer.uploadDataToC3Env():
-    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments()
-    * dataTypeImports: 2d array where first column is string of C3Type and second column\
-    is boolean dict with the following keys: removeData, uploadData, refreshCalcFields, & sqlRemove.
-        * removeData: remove current data for this type on env
-        * uploadData: upload data for this type to the env
-        * refreshCalcFields: refresh calc fields for this type on env
-        * sqlRemove: allow direct sql statements to operate on table on removes (has consequences)
-    * dataUploadFolder: filePath to where dataUploads folder is located
-    * errorOutputFolder = dataUploadFolder + '_Errors': filePath to where refreshCalc errors are stored
-    * batchSize = 250: size of batches to upload data
-    * errorSleepTimeSeconds = 15: time to sleep when request fails before retrying
-    * refreshPollTimeSeconds = 15: time between refreshCalc status pings
-    * maxColumnPrintLength = 150: max print length
-    * masterRemoveDataSwitch = True: has to be true in order to remove any C3 types
-    * masterUploadDataSwitch = True: has to be true in order to upload any C3 types
-    * masterRefreshDataSwitch = True: has to be true in order to refresh any C3 types
-    * sendDeveloperData = True: send usage statistics to better improve application
+    * sendDeveloperData = True: send usage statistics to better improve application.
 
 * c3DataTransfer.downloadDataFromC3Env():
-    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments()
+    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments().
     * dataTypeExports: 2d array where first column is string of C3Type and second column\
-    is boolean dict with the following keys: downloadData, refreshCalcFields, numFiles, & filter.
-        * downloadData: upload data for this type to the env
-        * refreshCalcFields: refresh calc fields for this type on env
-        * numFiles: number of files to split records into, also the number of map-reduce jobs
-        * filter: filter on C3 type for which records to extract
-    * dataDownloadFolder: filePath to where to download the exported files to
-    * errorOutputFolder = dataDownloadFolder + '_Errors': filePath to where refreshCalc errors are stored
-    * errorSleepTimeSeconds = 15: time to sleep when request fails before retrying
-    * refreshPollTimeSeconds = 15: time between refreshCalc status pings
-    * maxColumnPrintLength = 150: max print length
-    * stripMetadataAndDerived = True: strips out the metadata & derived fields (calcs, fkey, etc.)
-    * masterRefreshDataSwitch = True: has to be true in order to refresh any C3 types
-    * masterDownloadDataSwitch = True: has to be true in order to download any C3 types
-    * sendDeveloperData = True: send usage statistics to better improve application
+    is boolean dict with the following keys: downloadData, refreshCalcFields, numRecordsPerFile, & filter.
+        * downloadData: upload data for this type to the env.
+        * refreshCalcFields: refresh calc fields for this type on env.
+        * numRecordsPerFile = 2000: number of files to split records into, also the number of map-reduce jobs.
+        * filter = '1 == 1': filter on C3 type for which records to extract.
+    * dataDownloadFolder: filePath to where to download the exported files to.
+    * errorOutputFolder = dataDownloadFolder + '_Errors': filePath to where refreshCalc errors are stored.
+    * errorSleepTimeSeconds = 15: time to sleep when request fails before retrying.
+    * refreshPollTimeSeconds = 15: time between refreshCalc status pings.
+    * stripMetadataAndDerived = True: strips out the metadata & derived fields (calcs, fkey, etc.).
+    * masterRefreshDataSwitch = True: has to be true in order to refresh any C3 types.
+    * masterDownloadDataSwitch = True: has to be true in order to download any C3 types.
+    * maxColumnPrintLength = 150: max print length.
+    * promptUsersForWarnings = True: prompt users for warnings for accidental folder removals and resuming of queues.
+    * sendDeveloperData = True: send usage statistics to better improve application.
+
+* c3DataTransfer.uploadDataToC3Env():
+    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments().
+    * dataTypeImports: 2d array where first column is string of C3Type and second column\
+    is boolean dict with the following keys: removeData, uploadData, refreshCalcFields, useSQLOnRemove, & disableDownstreamOnRemove.
+        * removeData: remove current data for this type on env.
+        * uploadData: upload data for this type to the env.
+        * refreshCalcFields: refresh calc fields for this type on env.
+        * useSQLOnRemove = False: if the operation can be handled via multi-row SQL operations, it will.
+        * disableDownstreamOnRemove = False: disables any downstream asynchronous processing that would happen as a result of the operation (e.g. calc fields).
+    * dataUploadFolder: filePath to where dataUploads folder is located.
+    * errorOutputFolder = dataUploadFolder + '_Errors': filePath to where refreshCalc errors are stored.
+    * batchSize = 250: size of batches to upload data.
+    * errorSleepTimeSeconds = 15: time to sleep when request fails before retrying.
+    * refreshPollTimeSeconds = 15: time between refreshCalc status pings.
+    * masterRemoveDataSwitch = True: has to be true in order to remove any C3 types.
+    * masterUploadDataSwitch = True: has to be true in order to upload any C3 types.
+    * masterRefreshDataSwitch = True: has to be true in order to refresh any C3 types.
+    * maxColumnPrintLength = 150: max print length.
+    * promptUsersForWarnings = True: prompt users for warnings for accidental folder removals and resuming of queues.
+    * sendDeveloperData = True: send usage statistics to better improve application.
 
 * c3DataTransfer.callC3TypeAction() [Helper, Dynamic Filters]
-    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments()
-    * c3Type: the C3 type that contains the API
-    * action: the API off the C3 type to call
-    * payload: the payload to send with function parameters of the action
-    * sendDeveloperData = True: send usage statistics to better improve application
+    * environmentArguments: pass in the output from c3DataTransfer.parseEnvironmentArguments().
+    * c3Type: the C3 type that contains the API.
+    * action: the API off the C3 type to call.
+    * payload: the payload to send with function parameters of the action.
+    * sendDeveloperData = True: send usage statistics to better improve application.
 
 
 ## Usage Instructions
@@ -127,16 +130,16 @@ if __name__ == '__main__':
   itemFacilityConsumptionForecastIds = [x['id'] for x in itemFacilityConsumptionForecastFetchResults['objs']]
   itemFacilityConsumptionForecastMeasurementFilter = formatIntersectsFilter('forecast', itemFacilityConsumptionForecastIds)
 
-  defaultNumFiles = 1
+  numRecordsPerFile = 1000
   dataTypeExports = [
-    ['BusinessChangeRule',                         { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': '1 == 1'                                         }],
-    ['ConsumptionForecastRun',                     { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': consumptionForecastRunFilter                     }],
-    ['ItemFacilityConsumptionForecast',            { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': itemFacilityConsumptionForecastFilter            }],
-    ['ItemFacilityConsumptionForecastMeasurement', { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': itemFacilityConsumptionForecastMeasurementFilter }],
-    ['Item',                                       { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': '1 == 1'                                         }],
-    ['Facility',                                   { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': '1 == 1'                                         }],
-    ['NewCustomerRule',                            { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': '1 == 1'                                         }],
-    ['NonTypicalOrder',                            { 'downloadData': True, 'refreshCalcFields': True, 'numFiles': defaultNumFiles, 'filter': '1 == 1'                                         }],
+    ['BusinessChangeRule',                         { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': '1 == 1'                                         }],
+    ['ConsumptionForecastRun',                     { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': consumptionForecastRunFilter                     }],
+    ['ItemFacilityConsumptionForecast',            { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': itemFacilityConsumptionForecastFilter            }],
+    ['ItemFacilityConsumptionForecastMeasurement', { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': itemFacilityConsumptionForecastMeasurementFilter }],
+    ['Item',                                       { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': '1 == 1'                                         }],
+    ['Facility',                                   { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': '1 == 1'                                         }],
+    ['NewCustomerRule',                            { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': '1 == 1'                                         }],
+    ['NonTypicalOrder',                            { 'downloadData': True, 'refreshCalcFields': True, 'numRecordsPerFile': numRecordsPerFile, 'filter': '1 == 1'                                         }],
   ]
 
   c3DataTransfer.downloadDataFromC3Env(
@@ -168,12 +171,12 @@ if __name__ == '__main__':
   environmentArguments = c3DataTransfer.parseEnvironmentArguments()
 
   dataTypeImports = [
-    ['BusinessChangeRule',     { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
-    ['ConsumptionForecastRun', { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
-    ['Item',                   { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
-    ['Facility',               { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
-    ['NewCustomerRule',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
-    ['NonTypicalOrder',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True  }],
+    ['BusinessChangeRule',     { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['ConsumptionForecastRun', { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['Item',                   { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['Facility',               { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['NewCustomerRule',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
+    ['NonTypicalOrder',        { 'removeData': True,  'uploadData': True,  'refreshCalcFields': True, 'useSQLOnRemove': True, 'disableDownstreamOnRemove': True }],
   ]
 
   c3DataTransfer.uploadDataToC3Env(

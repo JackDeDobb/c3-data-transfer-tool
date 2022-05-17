@@ -62,7 +62,7 @@ def callC3TypeAction (environmentArguments, c3Type, action, payload, sendDevelop
     outerAPICall      = 'callC3TypeActionAPI'
   )
   c3UsageStats.callC3TypeActionAPI.logStart(environmentArguments, p, c3Type, action)
-  c3UsageStats.callC3TypeActionAPI.logFinish(r, p)
+  c3UsageStats.callC3TypeActionAPI.logFinish(environmentArguments, p)
 
   return requestResponse
 
