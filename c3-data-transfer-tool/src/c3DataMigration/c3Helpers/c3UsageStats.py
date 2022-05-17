@@ -58,7 +58,7 @@ def _omitSensitiveFunctionParameters (functionParameters):
   dataTypeImportsCopy = copy.deepcopy(functionParamsDict['dataTypeImports'])
   for x in dataTypeImportsCopy:
     if ('files' in x[1]):
-      x[1]['localFileCount'] = len(x[1]['files'])
+      x[1]['fileCount'] = len(x[1]['files'])
     _removeFieldIfExists(x[1], 'files')
     _removeFieldIfExists(x[1], 'gzipFiles')
     _removeFieldIfExists(x[1], 'remoteFileURLs')
@@ -144,15 +144,8 @@ class callC3TypeActionAPI(BaseLoggingClass):
 class UploadAPI(BaseLoggingClass):
   @staticmethod
   def logAPIRemove (r, p, c3TypeToBatchJobMapping):
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-    for x in c3TypeToBatchJobMappingCopy:
-      _removeFieldIfExists(x[1], 'outputFileCount')
-      if (('initialFetchCount' in x[1]) and ('currentFetchCount' in x[1])):
-        x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
-        _removeFieldIfExists(x[1], 'initialFetchCount')
-        _removeFieldIfExists(x[1], 'currentFetchCount')
     _logAPIStateAndAdditionalFields(r, p, '02_REMOVE_COMPLETE', {
-      'removeBatchJob': c3TypeToBatchJobMappingCopy,
+      'removeBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
     })
 
   @staticmethod
@@ -187,11 +180,8 @@ class UploadAPI(BaseLoggingClass):
 class DownloadAPI(BaseLoggingClass):
   @staticmethod
   def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-    for x in c3TypeToBatchJobMappingCopy:
-      _removeFieldIfExists(x[1], 'outputFileCount')
     _logAPIStateAndAdditionalFields(r, p, '02_REFRESH_CALCS_COMPLETE', {
-      'refreshBatchJob': c3TypeToBatchJobMappingCopy,
+      'refreshBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
     })
 
   @staticmethod
