@@ -22,7 +22,7 @@ from c3DataMigration.c3MigrationMethods import c3DataRemove
 
 def checkMostUpdatedVersion ():
   currentVersion = pkg_resources.get_distribution('c3-data-transfer-tool-jackdedobb').version
-  latestVersion = '1.0.654'
+  latestVersion = c3UtilityMethods.getLatestVersionC3DataTransferTool()
 
   if ((latestVersion != None) and (currentVersion != latestVersion)):
     print('Please upgrade to the latest version to continue using the tool. Please run pip install --upgrade c3-data-transfer-tool-jackdedobb.')
