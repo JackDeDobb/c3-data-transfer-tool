@@ -57,4 +57,8 @@ def refreshDataOnEnv (r, p, dataTypes):
   c3UtilityMethods.printFormatExtraDashes('GENERATING CALC FIELDS QUEUE ERROR FILES', p.maxColumnPrintLength, True)
   jobType = 'RefreshCalcFieldsBatchJob'
   c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, jobType)
-  c3UsageStats.logAPIRefreshCalcs(p, c3TypeToBatchJobMapping)
+
+  if (p.outerAPICall == 'downloadAPI'):
+    c3UsageStats.DownloadAPI.logAPIRefreshCalcs(r, p, c3TypeToBatchJobMapping)
+  elif (p.outerAPICall == 'uploadAPI'):
+    c3UsageStats.UploadAPI.logAPIRefreshCalcs(r, p, c3TypeToBatchJobMapping)

@@ -23,13 +23,14 @@ def _removeFieldIfExists (obj, field):
 
 def _formatDatetimeIfExists (obj, field):
   if (field in obj):
-    obj[field] = obj[field].isoformat()
+    obj[field] = obj[field].isoformat() if (obj[field] != None) else None
 
 
 
 
 def _omitSensitiveEnvironmentArguments (environmentArguments):
   envArgsDict = vars(copy.deepcopy(environmentArguments))
+
   _removeFieldIfExists(envArgsDict, 'tenantTag')
   _removeFieldIfExists(envArgsDict, 'userPass')
   _removeFieldIfExists(envArgsDict, 'user')
@@ -37,6 +38,34 @@ def _omitSensitiveEnvironmentArguments (environmentArguments):
   _removeFieldIfExists(envArgsDict, 'authToken')
 
   return envArgsDict
+
+
+
+
+def _omitSensitiveFunctionParameters (functionParameters):
+  functionParamsDict = vars(copy.deepcopy(functionParameters))
+
+  _removeFieldIfExists(functionParamsDict, 'errorOutputFolder')
+  _removeFieldIfExists(functionParamsDict, 'dataUploadFolder')
+  _removeFieldIfExists(functionParamsDict, 'dataDownloadFolder')
+  _formatDatetimeIfExists(functionParamsDict, 'initialTime')
+
+  dataTypeExportsCopy = copy.deepcopy(functionParamsDict['dataTypeExports'])
+  for x in dataTypeExportsCopy:
+    _removeFieldIfExists(x[1], 'filter')
+    _removeFieldIfExists(x[1], 'files')
+  functionParamsDict['dataTypeExports'] = dataTypeExportsCopy
+
+  dataTypeImportsCopy = copy.deepcopy(functionParamsDict['dataTypeImports'])
+  for x in dataTypeImportsCopy:
+    if ('files' in x[1]):
+      x[1]['fileCount'] = len(x[1]['files'])
+    _removeFieldIfExists(x[1], 'files')
+    _removeFieldIfExists(x[1], 'gzipFiles')
+    _removeFieldIfExists(x[1], 'remoteFileURLs')
+  functionParamsDict['dataTypeImports'] = dataTypeImportsCopy
+
+  return functionParamsDict
 
 
 
@@ -49,10 +78,6 @@ def _cleanC3ToTypeToBatchJobMappingArrays (c3TypeToBatchJobMappingArray):
     _removeFieldIfExists(x[1], 'id')
     _removeFieldIfExists(x[1], 'filter')
     _removeFieldIfExists(x[1], 'fileUrls')
-    if ((not ('initialFetchCount' in x[1])) or (x[1]['initialFetchCount'] == None)):
-      _removeFieldIfExists(x[1], 'initialFetchCount')
-    if ((not ('currentFetchCount' in x[1])) or (x[1]['currentFetchCount'] == None)):
-      _removeFieldIfExists(x[1], 'currentFetchCount')
     _formatDatetimeIfExists(x[1], 'launchTime')
     _formatDatetimeIfExists(x[1], 'completionTime')
   
@@ -71,208 +96,111 @@ def _logAPIParmeters (p, stateOfActions, data):
     url = '/'.join(['https://c3-data-transfer-tool-default-rtdb.firebaseio.com', user, p.outerAPICall, initialTimeFormatted, stateOfActions]) + '.json'
     requests.put(url, data=json.dumps(data))
   except:
-    pass
+    print('exception occured')
+
+
+
+def _logAPIStateAndAdditionalFields (r, p, state, additionalFieldsDict={}):
+  additionalFieldsDict = {} if (additionalFieldsDict == None) else additionalFieldsDict
+  defaultPostingFields = {
+    'environmentArguments': _omitSensitiveEnvironmentArguments(r),
+    'functionParams': _omitSensitiveFunctionParameters(p),
+    'state': state,
+  }
+
+  _logAPIParmeters(p, state, { **defaultPostingFields, **additionalFieldsDict })
 
 
 
 
-def logCompletionOfAPI (p):
-  try:
-    data = {
-      'apiStatus': 'COMPLETE'
-    }
-    _logAPIParmeters(p, 'COMPLETE', data)
-  except:
-    pass
+class BaseLoggingClass:
+  @staticmethod
+  def logStart (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', None)
+
+  @staticmethod
+  def logFinish (r, p):
+    _logAPIStateAndAdditionalFields(r, p, 'COMPLETE', None)
 
 
 
 
-def logParseArgsAPIParameters (r, p):
-  try:
-    data = {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-    }
-    _logAPIParmeters(p, '01_INITIAL', data)
-  except:
-    pass
+class ParseArgsAPI(BaseLoggingClass):
+  pass
 
 
 
 
-def logCallC3TypeActionAPIParameters (r, p, c3Type, action):
-  try:
-    data = {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
+class callC3TypeActionAPI(BaseLoggingClass):
+  @staticmethod
+  def logStart (r, p, c3Type, action):
+    _logAPIStateAndAdditionalFields(r, p, '01_INITIAL', {
       'c3Type': c3Type,
       'action': action,
-    }
-    _logAPIParmeters(p, '01_INITIAL', data)
-  except:
-    pass
+    })
 
 
 
 
-def logUploadAPIParameters(r, p):
-  try:
-    data = {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'dataTypeImports':          p.dataTypeImports,
-      'batchSize':                p.batchSize,
-      'errorSleepTimeSeconds':    p.errorSleepTimeSeconds,
-      'refreshPollTimeSeconds':   p.refreshPollTimeSeconds,
-      'maxColumnPrintLength':     p.maxColumnPrintLength,
-      'masterRemoveDataSwitch':   p.masterRemoveDataSwitch,
-      'masterRefreshDataSwitch':  p.masterRefreshDataSwitch,
-      'masterUploadDataSwitch':   p.masterUploadDataSwitch,
-    }
-    _logAPIParmeters(p, '01_INITIAL', data)
-  except:
-    pass
+class UploadAPI(BaseLoggingClass):
+  @staticmethod
+  def logAPIRemove (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '02_REMOVE_COMPLETE', {
+      'removeBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
+
+  @staticmethod
+  def logZipFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '03_ZIP_FILES', None)
+
+  @staticmethod
+  def logCurlFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES', None)
+
+  @staticmethod
+  def logBatchJob (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '05_BATCH_IMPORT', {
+      'importBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
+
+  @staticmethod
+  def logImportErrors (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '06_IMPORT_ERRORS', {
+      'importBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
+
+  @staticmethod
+  def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '07_REFRESH_CALCS_COMPLETE', {
+      'refreshBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
 
 
 
-def logDownloadAPIParameters (r, p):
-  try:
-    dataTypeExportsCopy = copy.deepcopy(p.dataTypeExports)
-    for x in dataTypeExportsCopy:
-      _removeFieldIfExists(x[1], 'filter')
+class DownloadAPI(BaseLoggingClass):
+  @staticmethod
+  def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '02_REFRESH_CALCS_COMPLETE', {
+      'refreshBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
-    data = {
-      'environmentArguments': _omitSensitiveEnvironmentArguments(r),
-      'dataTypeExports':          dataTypeExportsCopy,
-      'errorSleepTimeSeconds':    p.errorSleepTimeSeconds,
-      'refreshPollTimeSeconds':   p.refreshPollTimeSeconds,
-      'stripMetadataAndDerived':  p.stripMetadataAndDerived,
-      'maxColumnPrintLength':     p.maxColumnPrintLength,
-      'masterRefreshDataSwitch':  p.masterRefreshDataSwitch,
-      'masterDownloadDataSwitch': p.masterDownloadDataSwitch,
-    }
-    _logAPIParmeters(p, '01_INITIAL', data)
-  except:
-    pass
+  @staticmethod
+  def logBatchJob (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '03_BATCH_JOBS_COMPLETE', {
+      'exportBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })
 
+  @staticmethod
+  def logCurlFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '04_CURL_FILES_COMPLETE')
 
+  @staticmethod
+  def logExtractFiles (r, p):
+    _logAPIStateAndAdditionalFields(r, p, '05_EXTRACT_FILES_COMPLETE')
 
-
-def logAPIRefreshCalcs (p, c3TypeToBatchJobMapping):
-  try:
-    refreshCalcsPrefix = '02' if (p.outerFunctionAPI == 'downloadAPI') else '04'
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-    for x in c3TypeToBatchJobMappingCopy:
-      _removeFieldIfExists(x[1], 'outputFileCount')
-
-    data = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIParmeters(p, refreshCalcsPrefix + '_REFRESH-CALCS-COMPLETE', data)
-  except:
-    pass
-
-
-
-
-def logAPIRemove (p, c3TypeToBatchJobMapping):
-  try:
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-    for x in c3TypeToBatchJobMappingCopy:
-      _removeFieldIfExists(x[1], 'outputFileCount')
-      if (('initialFetchCount' in x[1]) and ('currentFetchCount' in x[1])):
-        x[1]['recordsRemoved'] = x[1]['initialFetchCount'] - x[1]['currentFetchCount']
-        _removeFieldIfExists(x[1], 'initialFetchCount')
-        _removeFieldIfExists(x[1], 'currentFetchCount')
-
-    data = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIParmeters(p, '02_REMOVE-COMPLETE', data)
-  except:
-    pass
-
-
-
-
-def logAPIUpload (p):
-  try:
-    dataTypeImportsCopy = copy.deepcopy(p.dataTypeImports)
-    for x in dataTypeImportsCopy:
-      _removeFieldIfExists(x[1], 'removeData')
-      _removeFieldIfExists(x[1], 'refreshCalcFields')
-      _removeFieldIfExists(x[1], 'useSQLOnRemove')
-      _removeFieldIfExists(x[1], 'disableDownstreamOnRemove')
-      _removeFieldIfExists(x[1], 'files')
-
-    data = {
-      'refreshJobMapping': dataTypeImportsCopy,
-    }
-    _logAPIParmeters(p, '03_UPLOAD-COMPLETE', data)
-  except:
-    pass
-
-
-
-
-def logAPIUploadZipFiles (p):
-  pass
-
-
-
-
-def logAPIUploadCurlFiles (p):
-  pass
-
-
-
-
-def logAPIUploadBatchJob (p, c3TypeToBatchJobMapping):
-  pass
-
-
-
-
-def logAPIUploadImportErrors (p, c3TypeToBatchJobMapping):
-  pass
-
-
-
-
-def logAPIDownloadBatchJob (p, c3TypeToBatchJobMapping):
-  try:
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-
-    data = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIParmeters(p, '03_BATCH-JOBS-COMPLETE', data)
-  except:
-    pass
-
-
-
-
-def logAPIDownloadCurlFiles (p, c3TypeToBatchJobMapping):
-  try:
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-
-    data = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIParmeters(p, '04_CURL-FILES-COMPLETE', data)
-  except:
-    pass
-
-
-
-
-def logAPIDownloadExtractFiles (p, c3TypeToBatchJobMapping):
-  try:
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-
-    data = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
-    }
-    _logAPIParmeters(p, '05_EXTRACT-FILES-COMPLETE', data)
-  except:
-    pass
+  @staticmethod
+  def logExportErrors (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '06_EXPORT_ERRORS', {
+      'exportBatchJob': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
+    })

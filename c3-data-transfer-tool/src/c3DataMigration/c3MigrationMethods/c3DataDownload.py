@@ -130,19 +130,20 @@ def downloadDataFromEnv (r, p):
   c3UtilityMethods.printFormatExtraDashes('DOWNLOADING DATA FROM THE ENV', p.maxColumnPrintLength, True)
   c3TypeToBatchJobMapping = _startDataDownloadFromEnv(r, p)
   _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.logAPIDownloadBatchJob(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logBatchJob(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('CURLING DOWN GENERATED EXPORT FILES', p.maxColumnPrintLength, True)
   _fetchGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.logAPIDownloadCurlFiles(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logCurlFiles(r, p)
 
   c3UtilityMethods.printFormatExtraDashes('EXTRACTING GENERATED EXPORT FILES', p.maxColumnPrintLength, True)
   _extractGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
   _cleanUpGeneratedExportFiles(r, p, c3TypeToBatchJobMapping)
-  c3UsageStats.logAPIDownloadExtractFiles(p, c3TypeToBatchJobMapping)
+  c3UsageStats.DownloadAPI.logExtractFiles(r, p)
 
   c3UtilityMethods.printFormatExtraDashes('SCANNING DOWNLOAD FOLDER INFO', p.maxColumnPrintLength, True)
   c3FileSystem.scanFilesInDirectory(p, p.dataTypeExports, p.dataDownloadFolder, True)
 
   c3UtilityMethods.printFormatExtraDashes('GENERATING EXPORT QUEUE ERROR FILES', p.maxColumnPrintLength, True)
   c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, 'Export')
+  c3UsageStats.DownloadAPI.logExportErrors(r, p, c3TypeToBatchJobMapping)
