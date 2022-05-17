@@ -146,3 +146,4 @@ def downloadDataFromEnv (r, p):
 
   c3UtilityMethods.printFormatExtraDashes('GENERATING EXPORT QUEUE ERROR FILES', p.maxColumnPrintLength, True)
   c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, 'Export')
+  c3UsageStats.DownloadAPI.logExportErrors(r, p, c3TypeToBatchJobMapping)

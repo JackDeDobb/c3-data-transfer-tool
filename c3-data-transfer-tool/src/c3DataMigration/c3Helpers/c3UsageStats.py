@@ -62,7 +62,7 @@ def _omitSensitiveFunctionParameters (functionParameters):
     _removeFieldIfExists(x[1], 'files')
     _removeFieldIfExists(x[1], 'gzipFiles')
     _removeFieldIfExists(x[1], 'remoteFileURLs')
-  functionParamsDict['dataTypeExports'] = dataTypeImportsCopy
+  functionParamsDict['dataTypeImports'] = dataTypeImportsCopy
 
   return functionParamsDict
 
@@ -179,12 +179,8 @@ class UploadAPI(BaseLoggingClass):
 
   @staticmethod
   def logAPIRefreshCalcs (r, p, c3TypeToBatchJobMapping):
-    c3TypeToBatchJobMappingCopy = _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping)
-    for x in c3TypeToBatchJobMappingCopy:
-      _removeFieldIfExists(x[1], 'outputFileCount')
-
     additionalFields = {
-      'refreshJobMapping': c3TypeToBatchJobMappingCopy,
+      'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
     }
     _logAPIStateAndAdditionalFields(r, p, '07_REFRESH_CALCS_COMPLETE', additionalFields)
 
@@ -222,3 +218,7 @@ class DownloadAPI(BaseLoggingClass):
       'refreshJobMapping': _cleanC3ToTypeToBatchJobMappingArrays(c3TypeToBatchJobMapping),
     }
     _logAPIStateAndAdditionalFields(r, p, '05_EXTRACT_FILES_COMPLETE', additionalFields)
+
+  @staticmethod
+  def logExportErrors (r, p, c3TypeToBatchJobMapping):
+    _logAPIStateAndAdditionalFields(r, p, '06_EXPORT_ERRORS', None)
