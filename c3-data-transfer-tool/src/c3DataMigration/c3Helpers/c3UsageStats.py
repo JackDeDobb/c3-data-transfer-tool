@@ -53,6 +53,7 @@ def _omitSensitiveFunctionParameters (functionParameters):
   dataTypeExportsCopy = copy.deepcopy(functionParamsDict['dataTypeExports'])
   for x in dataTypeExportsCopy:
     _removeFieldIfExists(x[1], 'filter')
+    _removeFieldIfExists(x[1], 'files')
   functionParamsDict['dataTypeExports'] = dataTypeExportsCopy
 
   dataTypeImportsCopy = copy.deepcopy(functionParamsDict['dataTypeImports'])
