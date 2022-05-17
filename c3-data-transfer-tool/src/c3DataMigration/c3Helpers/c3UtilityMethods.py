@@ -7,6 +7,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 #!/usr/bin/env python3
 import json
 import math
+import requests
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -57,6 +58,21 @@ def printFormatExtraDashes (printString, maxColumnPrintLength, printToConsole):
     print('\n' + prefix + ' ' + printString + ' ' + suffix)
 
   return [prefix, printString, suffix]
+
+
+
+
+def getLatestVersionC3DataTransferTool ():
+  latestVersion = None
+
+  try:
+    url = 'https://pypi.org/rss/project/c3-data-transfer-tool-jackdedobb/releases.xml'
+    rssFeed = requests.get(url)
+    latestVersion = ET.ElementTree(ET.fromstring(rssFeed.text)).getroot().find('./channel/item/title').text
+  except:
+    pass
+
+  return latestVersion
 
 
 

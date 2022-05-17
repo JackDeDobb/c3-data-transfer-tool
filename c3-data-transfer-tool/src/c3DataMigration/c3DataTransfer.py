@@ -6,6 +6,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 
 #!/usr/bin/env python3
 import argparse
+import pkg_resources
 from c3DataMigration.c3Helpers import c3FileSystem
 from c3DataMigration.c3Helpers import c3PythonClasses
 from c3DataMigration.c3Helpers import c3Request
@@ -19,7 +20,20 @@ from c3DataMigration.c3MigrationMethods import c3DataRemove
 
 
 
+def checkMostUpdatedVersion ():
+  currentVersion = pkg_resources.get_distribution('c3-data-transfer-tool-jackdedobb').version
+  latestVersion = c3UtilityMethods.getLatestVersionC3DataTransferTool()
+
+  if ((latestVersion != None) and (currentVersion != latestVersion)):
+    print('Please upgrade to the latest version to continue using the tool. Please run pip install --upgrade c3-data-transfer-tool-jackdedobb.')
+    exit(0)
+
+
+
+
 def parseEnvironmentArguments (sendDeveloperData=True):
+  checkMostUpdatedVersion()
+
   parser = argparse.ArgumentParser(description=
     'Uploads data files to a specific env.\
     You need to specify an environment, tenanttag, and authentication userpassword.'
@@ -54,6 +68,8 @@ def parseEnvironmentArguments (sendDeveloperData=True):
 
 
 def callC3TypeAction (environmentArguments, c3Type, action, payload, sendDeveloperData=True):
+  checkMostUpdatedVersion()
+
   url = c3Request.generateTypeActionURL(environmentArguments, c3Type, action)
   requestResponse = c3Request._makeRequestHelper(environmentArguments, url, payload)
 
@@ -84,6 +100,7 @@ def uploadDataToC3Env (
     promptUsersForWarnings=True,
     sendDeveloperData=True,
   ):
+  checkMostUpdatedVersion()
 
   r = environmentArguments
   p = c3PythonClasses.APIParameters(
@@ -127,6 +144,7 @@ def downloadDataFromC3Env (
     promptUsersForWarnings=True,
     sendDeveloperData=True,
   ):
+  checkMostUpdatedVersion()
 
   r = environmentArguments
   p = c3PythonClasses.APIParameters(
