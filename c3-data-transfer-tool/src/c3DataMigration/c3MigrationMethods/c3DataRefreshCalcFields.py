@@ -58,7 +58,7 @@ def refreshDataOnEnv (r, p, dataTypes):
   jobType = 'RefreshCalcFieldsBatchJob'
   c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, jobType)
 
-  if (p.outerFunctionAPI == 'downloadAPI'):
+  if (p.outerAPICall == 'downloadAPI'):
     c3UsageStats.DownloadAPI.logAPIRefreshCalcs(r, p, c3TypeToBatchJobMapping)
-  elif (p.outerFunctionAPI == 'uploadAPI'):
+  elif (p.outerAPICall == 'uploadAPI'):
     c3UsageStats.UploadAPI.logAPIRefreshCalcs(r, p, c3TypeToBatchJobMapping)

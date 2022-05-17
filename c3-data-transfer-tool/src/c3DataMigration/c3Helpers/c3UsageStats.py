@@ -23,7 +23,7 @@ def _removeFieldIfExists (obj, field):
 
 def _formatDatetimeIfExists (obj, field):
   if (field in obj):
-    obj[field] = obj[field].isoformat()
+    obj[field] = obj[field].isoformat() if (obj[field] != None) else None
 
 
 
@@ -54,6 +54,15 @@ def _omitSensitiveFunctionParameters (functionParameters):
   for x in dataTypeExportsCopy:
     _removeFieldIfExists(x[1], 'filter')
   functionParamsDict['dataTypeExports'] = dataTypeExportsCopy
+
+  dataTypeImportsCopy = copy.deepcopy(functionParamsDict['dataTypeImports'])
+  for x in dataTypeImportsCopy:
+    if ('files' in x[1]):
+      x[1]['localFileCount'] = len(x[1]['files'])
+    _removeFieldIfExists(x[1], 'files')
+    _removeFieldIfExists(x[1], 'gzipFiles')
+    _removeFieldIfExists(x[1], 'remoteFileURLs')
+  functionParamsDict['dataTypeExports'] = dataTypeImportsCopy
 
   return functionParamsDict
 
