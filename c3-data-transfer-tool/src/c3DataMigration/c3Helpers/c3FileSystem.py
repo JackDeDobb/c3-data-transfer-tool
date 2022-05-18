@@ -88,11 +88,12 @@ def deleteLocalFiles (filePaths):
 
 
 
-def wipeLocalDirectory (filePath, promptUser=False):
+def wipeLocalDirectory (p, filePath, promptUser=False):
   path = Path(filePath)
   if (path.exists() and path.is_dir()):
     if (promptUser == True):
-      print('Type (y/yes) to confirm directory removal: ' + filePath)
+      string = 'Type (y/yes) to confirm directory removal: ' + filePath
+      c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, True)
       if (not (input().lower() in ['y', 'yes'])):
         print('Exiting script.')
         exit(0)
@@ -247,7 +248,8 @@ def scanFilesInDirectory (p, dataTypes, directory, failScriptIfDuplicates=True):
     totalRecordCount, duplicateIds = getCountOfRecordsAndDuplicatesAcrossFiles(fullFilePaths)
 
     if ((len(duplicateIds) > 0) and failScriptIfDuplicates):
-      print('Exiting script. ' + c3Type + ' has duplicate ids: ' + str(duplicateIds))
+      string = 'Exiting script. ' + c3Type + ' has duplicate ids: ' + str(duplicateIds)
+      c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, True)
       exit(0)
 
     dataType[1]['files'] = fullFilePaths

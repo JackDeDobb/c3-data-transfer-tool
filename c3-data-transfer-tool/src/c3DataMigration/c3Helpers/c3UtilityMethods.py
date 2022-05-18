@@ -7,6 +7,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 #!/usr/bin/env python3
 import json
 import math
+import pkg_resources
 import requests
 import time
 import xml.etree.ElementTree as ET
@@ -40,6 +41,16 @@ def stripMetaAndDerivedFieldsFromRecords (records, fieldLabelMap):
 
 
 
+def printFormatWrapMaxColumnLength (string, maxColumnPrintLength, printToConsole):
+  chunks = [string[i:i+maxColumnPrintLength] for i in range(0, len(string), maxColumnPrintLength)]
+  if (printToConsole):
+    for chunk in chunks:
+      print(chunk)
+  return chunks
+
+
+
+
 def printFormatExtraPeriods (prefix, suffix, maxColumnPrintLength, printToConsole):
   customStringPeriods = '.' * (maxColumnPrintLength - len(prefix) - len(suffix))
   if (printToConsole):
@@ -62,16 +73,25 @@ def printFormatExtraDashes (printString, maxColumnPrintLength, printToConsole):
 
 
 
+def getLocalVersionC3DataTransferTool ():
+  currentVersion = None
+  try:
+    pkg_resources.get_distribution('c3-data-transfer-tool-jackdedobb').version
+  except:
+    pass
+  return currentVersion
+
+
+
+
 def getLatestVersionC3DataTransferTool ():
   latestVersion = None
-
   try:
     url = 'https://pypi.org/rss/project/c3-data-transfer-tool-jackdedobb/releases.xml'
     rssFeed = requests.get(url)
     latestVersion = ET.ElementTree(ET.fromstring(rssFeed.text)).getroot().find('./channel/item/title').text
   except:
     pass
-
   return latestVersion
 
 
@@ -100,7 +120,7 @@ def getc3Context (r, errorSleepTimeSeconds):
 
 
 
-def enableQueues (r, errorSleepTimeSeconds, promptUser=False, listOfQueueNamesToEnable=None):
+def enableQueues (r, p, promptUser=True, listOfQueueNamesToEnable=None):
   if (listOfQueueNamesToEnable == None):
     listOfQueueNamesToEnable = [
       'ActionQueue',
@@ -115,13 +135,14 @@ def enableQueues (r, errorSleepTimeSeconds, promptUser=False, listOfQueueNamesTo
   for queueName in listOfQueueNamesToEnable:
     url = c3Request.generateTypeActionURL(r, queueName, 'isPaused')
     errorCodePrefix = 'Unsuccessful checking status of queue: ' + queueName
-    request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, None, errorCodePrefix)
+    request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, None, errorCodePrefix)
     retVal = c3Request.parseXMLValueFromString(request.text.replace('"', ''), 'isPausedResponse')
     if (retVal == 'true'):
       queueNamesToEnable.append(queueName)
 
   if ((promptUser == True) and (len(queueNamesToEnable) > 0)):
-    print('Type (y/yes) to confirm resuming of queues: ' + str(queueNamesToEnable))
+    string = 'Type (y/yes) to confirm resuming of queues: ' + str(queueNamesToEnable)
+    printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, True)
     if (not (input().lower() in ['y', 'yes'])):
       print('Exiting script.')
       exit(0)
@@ -129,7 +150,7 @@ def enableQueues (r, errorSleepTimeSeconds, promptUser=False, listOfQueueNamesTo
   for queueName in queueNamesToEnable:
     url = c3Request.generateTypeActionURL(r, queueName, 'resume')
     errorCodePrefix = 'Unsuccessful resuming queue: ' + queueName
-    request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, None, errorCodePrefix)
+    request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, None, errorCodePrefix)
     print('Resumed Queue: ' + queueName)
 
 
