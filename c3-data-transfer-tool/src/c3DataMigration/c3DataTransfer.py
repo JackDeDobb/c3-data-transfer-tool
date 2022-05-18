@@ -6,7 +6,6 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 
 #!/usr/bin/env python3
 import argparse
-import pkg_resources
 from c3DataMigration.c3Helpers import c3FileSystem
 from c3DataMigration.c3Helpers import c3PythonClasses
 from c3DataMigration.c3Helpers import c3Request
@@ -21,10 +20,10 @@ from c3DataMigration.c3MigrationMethods import c3DataRemove
 
 
 def checkMostUpdatedVersion ():
-  currentVersion = pkg_resources.get_distribution('c3-data-transfer-tool-jackdedobb').version
+  currentVersion = c3UtilityMethods.getLocalVersionC3DataTransferTool()
   latestVersion = c3UtilityMethods.getLatestVersionC3DataTransferTool()
 
-  if ((latestVersion != None) and (currentVersion != latestVersion)):
+  if ((currentVersion != None) and (latestVersion != None) and (currentVersion != latestVersion)):
     print('Please upgrade to the latest version to continue using the tool. Please run pip install --upgrade c3-data-transfer-tool-jackdedobb.')
     exit(0)
 
@@ -120,8 +119,8 @@ def uploadDataToC3Env (
   )
 
   c3UsageStats.UploadAPI.logStart(environmentArguments, p)
-  c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
-  c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
+  c3FileSystem.wipeLocalDirectory(p, errorOutputFolder, p.promptUsersForWarnings)
+  c3UtilityMethods.enableQueues(r, p, p.promptUsersForWarnings)
   c3DataRemove.removeDataFromEnv(r, p)
   c3DataUpload.uploadDataToEnv(r, p)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeImports)
@@ -163,9 +162,9 @@ def downloadDataFromC3Env (
   )
 
   c3UsageStats.DownloadAPI.logStart(environmentArguments, p)
-  c3FileSystem.wipeLocalDirectory(dataDownloadFolder, p.promptUsersForWarnings)
-  c3FileSystem.wipeLocalDirectory(errorOutputFolder, p.promptUsersForWarnings)
-  c3UtilityMethods.enableQueues(r, p.errorSleepTimeSeconds, p.promptUsersForWarnings)
+  c3FileSystem.wipeLocalDirectory(p, dataDownloadFolder, p.promptUsersForWarnings)
+  c3FileSystem.wipeLocalDirectory(p, errorOutputFolder, p.promptUsersForWarnings)
+  c3UtilityMethods.enableQueues(r, p, p.promptUsersForWarnings)
   c3DataRefreshCalcFields.refreshDataOnEnv(r, p, p.dataTypeExports)
   c3DataDownload.downloadDataFromEnv(r, p)
   c3UsageStats.DownloadAPI.logFinish(r, p)
