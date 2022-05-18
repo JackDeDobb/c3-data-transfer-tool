@@ -78,12 +78,12 @@ def _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping):
 
 
 def _fetchGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
-  c3FileSystem.wipeLocalDirectory(p.dataDownloadFolder)
+  c3FileSystem.wipeLocalDirectory(p, p.dataDownloadFolder, p.promptUsersForWarnings)
   for c3TypeToBatchJob in c3TypeToBatchJobMapping:
     c3Type = c3TypeToBatchJob[0]
     fileUrls = c3TypeToBatchJob[1]['fileUrls']
     dataTypeFilesFolderPath = '/'.join([p.dataDownloadFolder, c3Type])
-    c3FileSystem.wipeLocalDirectory(dataTypeFilesFolderPath)
+    c3FileSystem.wipeLocalDirectory(p, dataTypeFilesFolderPath, p.promptUsersForWarnings)
 
     if (c3TypeToBatchJob[1]['status'] in ['completed']):
       if (len(fileUrls) == 0):
@@ -145,5 +145,5 @@ def downloadDataFromEnv (r, p):
   c3FileSystem.scanFilesInDirectory(p, p.dataTypeExports, p.dataDownloadFolder, True)
 
   c3UtilityMethods.printFormatExtraDashes('GENERATING EXPORT QUEUE ERROR FILES', p.maxColumnPrintLength, True)
-  c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, 'Export')
+  c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p, c3TypeToBatchJobMapping, 'Export')
   c3UsageStats.DownloadAPI.logExportErrors(r, p, c3TypeToBatchJobMapping)

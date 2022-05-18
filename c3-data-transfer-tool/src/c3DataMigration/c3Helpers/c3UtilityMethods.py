@@ -332,15 +332,15 @@ def outputQueueErrors (r, errorSleepTimeSeconds, dataTypeErrorFileLocation, c3Ty
 
 
 
-def outputAllQueueErrorsFromMapping (r, errorSleepTimeSeconds, maxColumnPrintLength, errorOutputFolder, c3TypeToBatchJobMapping, jobType):
-  queueErrorOutputFolder = '/'.join([errorOutputFolder, jobType])
-  c3FileSystem.wipeLocalDirectory(queueErrorOutputFolder)
+def outputAllQueueErrorsFromMapping (r, p, c3TypeToBatchJobMapping, jobType):
+  queueErrorOutputFolder = '/'.join([p.errorOutputFolder, jobType])
+  c3FileSystem.wipeLocalDirectory(p, queueErrorOutputFolder, p.promptUsersForWarnings)
 
   for c3TypeToBatchJob in c3TypeToBatchJobMapping:
     c3Type = c3TypeToBatchJob[0]
     if (c3TypeToBatchJob[1]['status'] in ['failing', 'failed']):
       dataTypeErrorFileLocation = '/'.join([queueErrorOutputFolder, c3Type + '_errors.xml'])
-      outputQueueErrors(r, errorSleepTimeSeconds, dataTypeErrorFileLocation, c3Type, c3TypeToBatchJob[1]['id'])
-      printFormatExtraPeriods('Generating ' + c3Type, 'DONE', maxColumnPrintLength, True)
+      outputQueueErrors(r, p.errorSleepTimeSeconds, dataTypeErrorFileLocation, c3Type, c3TypeToBatchJob[1]['id'])
+      printFormatExtraPeriods('Generating ' + c3Type, 'DONE', p.maxColumnPrintLength, True)
     else:
-      printFormatExtraPeriods('Generating ' + c3Type, 'NO ERRORS', maxColumnPrintLength, True)
+      printFormatExtraPeriods('Generating ' + c3Type, 'NO ERRORS', p.maxColumnPrintLength, True)
