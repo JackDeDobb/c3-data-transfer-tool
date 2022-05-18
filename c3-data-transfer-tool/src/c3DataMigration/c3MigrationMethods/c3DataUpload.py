@@ -143,5 +143,5 @@ def uploadDataToEnv (r, p):
   c3UsageStats.UploadAPI.logBatchJob(r, p, c3TypeToBatchJobMapping)
 
   c3UtilityMethods.printFormatExtraDashes('GENERATING IMPORT QUEUE ERROR FILES', p.maxColumnPrintLength, True)
-  c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p.errorSleepTimeSeconds, p.maxColumnPrintLength, p.errorOutputFolder, c3TypeToBatchJobMapping, 'Import')
+  c3UtilityMethods.outputAllQueueErrorsFromMapping(r, p, c3TypeToBatchJobMapping, 'Import')
   c3UsageStats.UploadAPI.logImportErrors(r, p, c3TypeToBatchJobMapping)
