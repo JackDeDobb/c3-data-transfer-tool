@@ -7,6 +7,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 #!/usr/bin/env python3
 import json
 import math
+import os
 import pkg_resources
 import requests
 import time
@@ -76,9 +77,11 @@ def printFormatExtraDashes (printString, maxColumnPrintLength, printToConsole):
 def getLocalVersionC3DataTransferTool ():
   currentVersion = None
   try:
-    pkg_resources.get_distribution('c3-data-transfer-tool-jackdedobb').version
+    commandOutput = os.popen('pip3 show c3-data-transfer-tool-jackdedobb | grep Version').read()
+    currentVersion = commandOutput[len('Version: '):].replace('\n', '')
   except:
     pass
+
   return currentVersion
 
 
