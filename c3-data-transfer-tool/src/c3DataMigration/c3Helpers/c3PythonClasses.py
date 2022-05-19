@@ -40,17 +40,17 @@ class APIParameters:
 
 
 
-  def _validateAndAssignFieldInDict (self, dictionary, field, expectedType, required, defaultValueIfNotRequired=None):
+  def _validateAndAssignFieldInDict (self, dictionary, field, fieldParams):
     retBool = True
 
-    if (required):
+    if (fieldParams['required']):
       retBool = retBool and (field in dictionary)
-      retBool = retBool and isinstance(dictionary[field], expectedType)
+      retBool = retBool and isinstance(dictionary[field], fieldParams['type'])
     else:
       if (field in dictionary):
-        retBool = retBool and isinstance(dictionary[field], expectedType)
+        retBool = retBool and isinstance(dictionary[field], fieldParams['type'])
       else:
-        dictionary[field] = defaultValueIfNotRequired
+        dictionary[field] = fieldParams['defaultValue']
 
     return retBool
 
@@ -65,14 +65,19 @@ class APIParameters:
       assert(isinstance(dataTypeImport, list) and (len(dataTypeImport) == 2))
       dataType = dataTypeImport[0]
       dataTypeConfig = dataTypeImport[1]
-
       assert(isinstance(dataType, str))
       assert(isinstance(dataTypeConfig, dict))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'removeData', bool, True))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'uploadData', bool, True))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'refreshCalcFields', bool, True))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'useSQLOnRemove', bool, False, False))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'disableDownstreamOnRemove', bool, False, False))
+
+      fieldsToCheck = {
+        'removeData':                { 'type': bool, 'required': True,  'defaultValue': None  },
+        'uploadData':                { 'type': bool, 'required': True,  'defaultValue': None  },
+        'refreshCalcFields':         { 'type': bool, 'required': True,  'defaultValue': None  },
+        'useSQLOnRemove':            { 'type': bool, 'required': False, 'defaultValue': False },
+        'disableDownstreamOnRemove': { 'type': bool, 'required': False, 'defaultValue': False },
+      }
+      for fieldToCheck, fieldParams in fieldsToCheck.items():
+        assert(self._validateAndAssignFieldInDict(dataTypeConfig, fieldToCheck, fieldParams))
+      assert(len(set(dataTypeConfig.keys()) - set(fieldsToCheck.keys())) == 0)
 
       dataTypeConfig['gzipFiles'] = []
       dataTypeConfig['remoteFileUrls'] = []
@@ -88,13 +93,19 @@ class APIParameters:
       assert(isinstance(dataTypeExport, list) and (len(dataTypeExport) == 2))
       dataType = dataTypeExport[0]
       dataTypeConfig = dataTypeExport[1]
-
       assert(isinstance(dataType, str))
       assert(isinstance(dataTypeConfig, dict))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'downloadData', bool, True))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'refreshCalcFields', bool, True))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'numRecordsPerFile', int, False, 2000))
-      assert(self._validateAndAssignFieldInDict(dataTypeConfig, 'filter', str, False, '1 == 1'))
+
+      fieldsToCheck = {
+        'downloadData':      { 'type': bool, 'required': True,  'defaultValue': None     },
+        'refreshCalcFields': { 'type': bool, 'required': True,  'defaultValue': None     },
+        'numRecordsPerFile': { 'type': int,  'required': False, 'defaultValue': 2000     },
+        'filter':            { 'type': str,  'required': False, 'defaultValue': '1 == 1' },
+      }
+      for fieldToCheck, fieldParams in fieldsToCheck.items():
+        assert(self._validateAndAssignFieldInDict(dataTypeConfig, fieldToCheck, fieldParams))
+      assert(len(set(dataTypeConfig.keys()) - set(fieldsToCheck.keys())) == 0)
+
 
 
 
