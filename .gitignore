@@ -1,7 +1,7 @@
 .DS_Store
 __pycache__/
 
-/.vscode/
+.vscode/
 /kochExampleCase/
 
 /c3-data-transfer-tool/dist
