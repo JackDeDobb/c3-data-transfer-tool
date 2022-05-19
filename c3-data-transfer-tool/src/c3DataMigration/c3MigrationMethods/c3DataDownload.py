@@ -78,12 +78,12 @@ def _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping):
 
 
 def _fetchGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
-  c3FileSystem.wipeLocalDirectory(p, p.dataDownloadFolder, p.promptUsersForWarnings)
+  c3FileSystem.wipeLocalDirectory(p, p.dataDownloadFolder, False)
   for c3TypeToBatchJob in c3TypeToBatchJobMapping:
     c3Type = c3TypeToBatchJob[0]
     fileUrls = c3TypeToBatchJob[1]['fileUrls']
     dataTypeFilesFolderPath = '/'.join([p.dataDownloadFolder, c3Type])
-    c3FileSystem.wipeLocalDirectory(p, dataTypeFilesFolderPath, p.promptUsersForWarnings)
+    c3FileSystem.wipeLocalDirectory(p, dataTypeFilesFolderPath, False)
 
     if (c3TypeToBatchJob[1]['status'] in ['completed']):
       if (len(fileUrls) == 0):
