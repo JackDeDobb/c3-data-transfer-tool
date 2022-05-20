@@ -12,6 +12,7 @@ import shutil
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from progress.bar import IncrementalBar
+from reprint import output
 from c3DataMigration.c3Helpers import c3Request
 from c3DataMigration.c3Helpers import c3UtilityMethods
 
@@ -210,10 +211,19 @@ def zipFilesInDirectory (r, p, uploadsDirectory, dataTypes):
 
 
 
-def getCountOfRecordsAndDuplicatesAcrossFiles (filePaths):
+def getCountOfRecordsAndDuplicatesAcrossFiles (c3Type, maxColumnPrintLength, filePaths, outputLines):
+  def _printHelper (idx, total):
+    fileStringPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Files:', '{:,}'.format(idx), 13, False)
+    fileString = fileStringPartsStringArr[0] + (' ' * len(fileStringPartsStringArr[1])) + fileStringPartsStringArr[2]
+    totalRecordPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Records:', '{:,}'.format(total), 19, False)
+    totalRecordString = totalRecordPartsStringArr[0] + (' ' * len(totalRecordPartsStringArr[1])) + totalRecordPartsStringArr[2]
+    suffixString = fileString + ' / ' +  totalRecordString
+    outputLines[-1] = ''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, suffixString, maxColumnPrintLength, False))
+
   seen, dupes = set(), set()
   total = 0
-  for filePath in filePaths:
+  _printHelper(0, 0)
+  for idx, filePath in enumerate(filePaths):
     if (os.path.exists(filePath) and Path(filePath).is_file()):
       with open(filePath) as jsonFile:
         jsonContents = json.load(jsonFile)
@@ -223,6 +233,7 @@ def getCountOfRecordsAndDuplicatesAcrossFiles (filePaths):
             dupes.add(x['id'])
           else:
             seen.add(x['id'])
+      _printHelper(idx + 1, total)
 
   return total, list(dupes)
 
@@ -230,36 +241,30 @@ def getCountOfRecordsAndDuplicatesAcrossFiles (filePaths):
 
 
 def scanFilesInDirectory (p, dataTypes, directory, failScriptIfDuplicates=True):
-  for dataType in dataTypes:
-    c3Type = dataType[0]
+  with output(output_type='list', initial_len=len(dataTypes), interval=0) as outputLines:
+    for dataType in dataTypes:
+      c3Type = dataType[0]
 
-    if (p.outerAPICall == 'uploadAPI'):
-      if (dataType[1]['uploadData'] != True):
-        c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'UPLOAD FLAG IS FALSE', p.maxColumnPrintLength, True)
-        continue
-    elif (p.outerAPICall == 'downloadAPI'):
-      if (dataType[1]['downloadData'] != True):
-        c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'DOWNLOAD FLAG IS FALSE', p.maxColumnPrintLength, True)
-        continue
+      if (p.outerAPICall == 'uploadAPI'):
+        if (dataType[1]['uploadData'] != True):
+          outputLines.append(''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'UPLOAD FLAG IS FALSE', p.maxColumnPrintLength, False)))
+          continue
+      elif (p.outerAPICall == 'downloadAPI'):
+        if (dataType[1]['downloadData'] != True):
+          outputLines.append(''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'DOWNLOAD FLAG IS FALSE', p.maxColumnPrintLength, False)))
+          continue
 
-    dataTypeUploadFolder = '/'.join([directory, c3Type])
-    fullFilePaths = getLocalFilePathsWithinDirectory(dataTypeUploadFolder, '.json')
-    gzipFilePaths = getLocalFilePathsWithinDirectory(dataTypeUploadFolder, '.gz')
-    totalRecordCount, duplicateIds = getCountOfRecordsAndDuplicatesAcrossFiles(fullFilePaths)
+      dataTypeUploadFolder = '/'.join([directory, c3Type])
+      fullFilePaths = getLocalFilePathsWithinDirectory(dataTypeUploadFolder, '.json')
+      gzipFilePaths = getLocalFilePathsWithinDirectory(dataTypeUploadFolder, '.gz')
+      outputLines.append('')
+      totalRecordCount, duplicateIds = getCountOfRecordsAndDuplicatesAcrossFiles(c3Type, p.maxColumnPrintLength, fullFilePaths, outputLines)
 
-    if ((len(duplicateIds) > 0) and failScriptIfDuplicates):
-      string = 'Exiting script. ' + c3Type + ' has duplicate ids: ' + str(duplicateIds)
-      c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, True)
-      exit(0)
+      if ((len(duplicateIds) > 0) and failScriptIfDuplicates):
+        string = 'Exiting script. ' + c3Type + ' has duplicate ids: ' + str(duplicateIds)
+        c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, True)
+        exit(0)
 
-    dataType[1]['files'] = fullFilePaths
-    dataType[1]['gzipFiles'] = gzipFilePaths
-    dataType[1]['recordCount'] = totalRecordCount
-
-    fileStringPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Files:', '{:,}'.format(len(fullFilePaths)), 13, False)
-    fileString = fileStringPartsStringArr[0] + (' ' * len(fileStringPartsStringArr[1])) + fileStringPartsStringArr[2]
-    totalRecordPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Records:', '{:,}'.format(totalRecordCount), 19, False)
-    totalRecordString = totalRecordPartsStringArr[0] + (' ' * len(totalRecordPartsStringArr[1])) + totalRecordPartsStringArr[2]
-
-    suffixString = fileString + ' / ' +  totalRecordString
-    c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, suffixString, p.maxColumnPrintLength, True)
+      dataType[1]['files'] = fullFilePaths
+      dataType[1]['gzipFiles'] = gzipFilePaths
+      dataType[1]['recordCount'] = totalRecordCount

@@ -23,7 +23,7 @@ def checkMostUpdatedVersion ():
   currentVersion = c3UtilityMethods.getLocalVersionC3DataTransferTool()
   latestVersion = c3UtilityMethods.getLatestVersionC3DataTransferTool()
 
-  if ((currentVersion != None) and (latestVersion != None) and (currentVersion != latestVersion)):
+  if ((currentVersion not in [None, '']) and (latestVersion not in [None, '']) and (currentVersion != latestVersion)):
     print('Please upgrade to the latest version to continue using the tool. Please run pip install --upgrade c3-data-transfer-tool-jackdedobb.')
     exit(0)
 
