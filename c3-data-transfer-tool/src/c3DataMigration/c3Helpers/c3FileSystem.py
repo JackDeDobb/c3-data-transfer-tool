@@ -262,7 +262,9 @@ def scanFilesInDirectory (p, dataTypes, directory, failScriptIfDuplicates=True):
 
       if ((len(duplicateIds) > 0) and failScriptIfDuplicates):
         string = 'Exiting script. ' + c3Type + ' has duplicate ids: ' + str(duplicateIds)
-        outputLines.append(''.join(c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, False)))
+        errorLines = c3UtilityMethods.printFormatWrapMaxColumnLength(string, p.maxColumnPrintLength, False)
+        for errorLine in errorLines:
+          outputLines.append(errorLine)
         exit(0)
 
       dataType[1]['files'] = fullFilePaths
