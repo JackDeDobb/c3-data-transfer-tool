@@ -212,8 +212,17 @@ def zipFilesInDirectory (r, p, uploadsDirectory, dataTypes):
 
 
 def getCountOfRecordsAndDuplicatesAcrossFiles (c3Type, maxColumnPrintLength, filePaths, outputLines):
+  def _printHelper (idx, total):
+    fileStringPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Files:', '{:,}'.format(idx), 13, False)
+    fileString = fileStringPartsStringArr[0] + (' ' * len(fileStringPartsStringArr[1])) + fileStringPartsStringArr[2]
+    totalRecordPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Records:', '{:,}'.format(total), 19, False)
+    totalRecordString = totalRecordPartsStringArr[0] + (' ' * len(totalRecordPartsStringArr[1])) + totalRecordPartsStringArr[2]
+    suffixString = fileString + ' / ' +  totalRecordString
+    outputLines[-1] = ''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, suffixString, maxColumnPrintLength, False))
+
   seen, dupes = set(), set()
   total = 0
+  _printHelper(0, 0)
   for idx, filePath in enumerate(filePaths):
     if (os.path.exists(filePath) and Path(filePath).is_file()):
       with open(filePath) as jsonFile:
@@ -224,13 +233,7 @@ def getCountOfRecordsAndDuplicatesAcrossFiles (c3Type, maxColumnPrintLength, fil
             dupes.add(x['id'])
           else:
             seen.add(x['id'])
-
-      fileStringPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Files:', '{:,}'.format(idx), 13, False)
-      fileString = fileStringPartsStringArr[0] + (' ' * len(fileStringPartsStringArr[1])) + fileStringPartsStringArr[2]
-      totalRecordPartsStringArr = c3UtilityMethods.printFormatExtraPeriods('Records:', '{:,}'.format(total), 19, False)
-      totalRecordString = totalRecordPartsStringArr[0] + (' ' * len(totalRecordPartsStringArr[1])) + totalRecordPartsStringArr[2]
-      suffixString = fileString + ' / ' +  totalRecordString
-      outputLines[-1] = ''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, suffixString, maxColumnPrintLength, False))
+      _printHelper(idx + 1, total)
 
   return total, list(dupes)
 
@@ -244,11 +247,11 @@ def scanFilesInDirectory (p, dataTypes, directory, failScriptIfDuplicates=True):
 
       if (p.outerAPICall == 'uploadAPI'):
         if (dataType[1]['uploadData'] != True):
-          c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'UPLOAD FLAG IS FALSE', p.maxColumnPrintLength, True)
+          outputLines.append(''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'UPLOAD FLAG IS FALSE', p.maxColumnPrintLength, False)))
           continue
       elif (p.outerAPICall == 'downloadAPI'):
         if (dataType[1]['downloadData'] != True):
-          c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'DOWNLOAD FLAG IS FALSE', p.maxColumnPrintLength, True)
+          outputLines.append(''.join(c3UtilityMethods.printFormatExtraPeriods('Scanning ' + c3Type, 'DOWNLOAD FLAG IS FALSE', p.maxColumnPrintLength, False)))
           continue
 
       dataTypeUploadFolder = '/'.join([directory, c3Type])
