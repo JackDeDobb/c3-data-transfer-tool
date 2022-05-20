@@ -8,7 +8,6 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 import json
 import math
 import os
-import pkg_resources
 import requests
 import time
 import xml.etree.ElementTree as ET
