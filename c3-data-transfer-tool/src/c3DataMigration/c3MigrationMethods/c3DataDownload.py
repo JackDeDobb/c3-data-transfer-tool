@@ -6,6 +6,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 
 #!/usr/bin/env python3
 import xml.etree.ElementTree as ET
+import json
 from progress.bar import IncrementalBar
 from functools import reduce
 from c3DataMigration.c3Helpers import c3FileSystem
@@ -71,7 +72,7 @@ def _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping):
       errorCodePrefix = 'Unsuccessful retrieving files for export of type ' + c3TypeToBatchJob[0]
       request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
 
-      fileUrls = [x.text for x in ET.ElementTree(ET.fromstring(request.text)).getroot().findall('./filesResponse/v/url')]
+      fileUrls = [x['url'] for x in json.loads(request.text)]
       c3TypeToBatchJob[1]['fileUrls'] = fileUrls
 
 

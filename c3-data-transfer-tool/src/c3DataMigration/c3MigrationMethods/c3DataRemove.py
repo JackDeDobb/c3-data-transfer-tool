@@ -6,6 +6,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 
 #!/usr/bin/env python3
 import time
+import json
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from reprint import output
@@ -25,7 +26,7 @@ def _startDataRemoveFromEnv (r, p):
       c3UtilityMethods.printFormatExtraPeriods('Kicking off ' + c3Type, 'REMOVE FLAG IS FALSE', p.maxColumnPrintLength, True)
       continue
 
-    totalRecordsOnEnv = c3UtilityMethods.fetchCountOnType(r, p.errorSleepTimeSeconds, c3Type, '1 == 1')
+    totalRecordsOnEnv = c3UtilityMethods.fetchCountOnType(r, p.errorSleepTimeSeconds, c3Type, '')
 
     url = c3Request.generateTypeActionURL(r, 'AsyncAction', 'submit')
     payload = {
@@ -70,10 +71,10 @@ def _finishRemoveDataFromEnv (r, p, c3TypeToBatchJobMapping):
         errorCodePrefix = 'Unsuccessful async removeAll status for type ' + c3Type
         request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
 
-        completed = ET.ElementTree(ET.fromstring(request.text)).getroot().find('./completed').text
+        completed = json.loads(request.text)["completed"]
         currentFetchCount = c3UtilityMethods.fetchCountOnType(r, p.errorSleepTimeSeconds, c3Type, '1 == 1')
 
-        if (completed == 'true'):
+        if completed == True:
           c3TypeToBatchJob[1]['completionTime'] = datetime.now()
           c3TypeToBatchJob[1]['status'] = 'completed'
         c3TypeToBatchJob[1]['currentFetchCount'] = currentFetchCount

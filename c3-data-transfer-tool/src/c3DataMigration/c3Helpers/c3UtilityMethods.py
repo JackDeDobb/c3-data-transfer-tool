@@ -156,9 +156,104 @@ def enableQueues (r, p, promptUser=True, listOfQueueNamesToEnable=None):
     print('Resumed Queue: ' + queueName)
 
 
+def isCassandraType(r, errorSleepTimeSeconds, c3Type):
+  url = c3Request.generateTypeActionURL(r, "TagMetadataStore", "entityTypes")
+  payload = {
+    "datastoreName": "cassandra"
+  }
+  errorCodePrefix = "Unsuccessful retrieval of cassandra types"
+  request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  c3types = json.loads(request.text)
+  cassandraTypes = []
+  for c3type in c3types:
+    cassandraTypes.append(c3type["typeName"])
+  return c3Type in cassandraTypes
 
+def kickoffMapReduceToCountCassandraType(r, errorSleepTimeSeconds, c3Type, filterString):
+  url = c3Request.generateTypeActionURL(r, "JS", "mapReduce")
+  payload = {
+      "spec": {
+        "targetType": {
+          "typeName": "FinancialStatementBase"
+        },
+        "map":"""function map(_batch, objs) {
+                   return { count: objs.map((a) => FinancialStatementBaseStateHistory
+                           .fetchCount({filter: Filter.eq('parent.id', a.id) }) )
+                           .reduce((a, b) => a + b)
+                   }
+                 }""",
+        "reduce":"""function reduce(_outKey, interValues) {
+                      return [interValues.reduce((a, b) => a + b)];
+                    }"""
+      }
+    }
+  errorCodePrefix = "Unsuccessful mapreduce on cassandra types to aquire count"
+  request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  while (request.status_code != 200):
+    print(errorCodePrefix + ' w/ status code: ' + str(request.status_code))
+    print('Error Message: ' + request.text)
+    print('Sleeping ' + str(errorSleepTimeSeconds) + ' seconds, and retrying. Use Control-C to kill program.')
+    time.sleep(errorSleepTimeSeconds)
+  mapReduceJob = json.loads(request.text)
+  mapReduceJId = mapReduceJob['id']
+  return mapReduceJId
+  
+  
+def getMapReduceJobResults(jobId,r, errorSleepTimeSeconds, c3Type, filterString):
+  waitForJobToComplete(jobId,r, errorSleepTimeSeconds, c3Type, filterString)
+  url = c3Request.generateTypeActionURL(r, "JSMapReduceJob", "results")
+  payload = {
+    "this": {
+      "id": jobId
+      }
+    }
+  errorCodePrefix = "Unsuccessful get results on map reduce job to count cassandra records"
+  request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  while (request.status_code != 200):
+    print(errorCodePrefix + ' w/ status code: ' + str(request.status_code))
+    print('Error Message: ' + request.text)
+    print('Sleeping ' + str(errorSleepTimeSeconds) + ' seconds, and retrying. Use Control-C to kill program.')
+    time.sleep(errorSleepTimeSeconds)
+  jsonResponse = json.loads(request.text)
+  return jsonResponse
+  # results = jsonResponse[0][1][1].find('value').text
+  # return results
+  
+def waitForJobToComplete(jobId,r, errorSleepTimeSeconds, c3Type, filterString):
+  url = c3Request.generateTypeActionURL(r, "JSMapReduceJob", "status")
+  payload = {
+    "this": {
+      "id": jobId
+      }
+    }
+  errorCodePrefix = "Unsuccessful status check on map reduce job to count cassandra records"
+  request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  while (request.status_code != 200):
+    print(errorCodePrefix + ' w/ status code: ' + str(request.status_code))
+    print('Error Message: ' + request.text)
+    print('Sleeping ' + str(errorSleepTimeSeconds) + ' seconds, and retrying. Use Control-C to kill program.')
+    time.sleep(errorSleepTimeSeconds)
+
+  jsonResponse = json.loads(request.text)
+  while (not jsonResponse["status"] == "completed"):
+    # wait for the job to complete
+    time.sleep(errorSleepTimeSeconds)
+    request = c3Request.makeRequest(r, errorSleepTimeSeconds, url, payload, errorCodePrefix)
+    jsonResponse = json.loads(request.text)
+
+def fetchCountOnCassandraType(r, errorSleepTimeSeconds, c3Type, filterString):
+  jobId = kickoffMapReduceToCountCassandraType(r, errorSleepTimeSeconds, c3Type, filterString)
+  results = getMapReduceJobResults(jobId,r, errorSleepTimeSeconds, c3Type, filterString)
+  if results is not None:
+    return int(float(results['count'][0]['value']))
+  else:
+    return 0
+  
 
 def fetchCountOnType (r, errorSleepTimeSeconds, c3Type, filterString):
+  if isCassandraType(r, errorSleepTimeSeconds, c3Type):
+    return fetchCountOnCassandraType(r, errorSleepTimeSeconds, c3Type, filterString)
+    
   url = c3Request.generateTypeActionURL(r, c3Type, 'fetchCount')
   payload = {
     'spec': {
@@ -302,7 +397,7 @@ def waitForBatchJobsToComplete (r, p, c3TypeToBatchJobMapping, jobType, typeOfBa
         errorCodePrefix = 'Unsuccessful grabbing status of ' + jobType + ' for type ' + c3TypeToBatchJob[0]
         request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
 
-        runStatus = ET.ElementTree(ET.fromstring(request.text)).getroot().find('./run/status/status').text
+        runStatus = json.loads(request.text)["run"]["status"]["status"]
         c3TypeToBatchJob[1]['status'] = runStatus
         if (runStatus == 'completed'):
           c3TypeToBatchJob[1]['completionTime'] = datetime.now()
