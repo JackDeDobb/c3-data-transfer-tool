@@ -44,8 +44,9 @@ def getRemoteRootURL (r, p):
 def getRemoteImportDirectory (r, p):
   remoteFileSystemRoot = getRemoteRootURL(r, p)
   scriptRunnerUsername = c3UtilityMethods.getc3Context(r, p.errorSleepTimeSeconds)['username']
-  directoryOnEnv = '/'.join([remoteFileSystemRoot, 'c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
-  # directoryOnEnv = remoteFileSystemRoot + '/'.join(['c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
+  directoryOnEnv = '/'.join([ 'c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
+  if not p.truncateFilePaths:
+    directoryOnEnv = '/'.join([remoteFileSystemRoot, directoryOnEnv]) # TODO: May also want to key off timestamp
 
   return directoryOnEnv
 

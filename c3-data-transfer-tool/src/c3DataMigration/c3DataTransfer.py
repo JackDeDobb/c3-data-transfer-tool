@@ -98,6 +98,7 @@ def uploadDataToC3Env (
     maxColumnPrintLength=None,
     promptUsersForWarnings=True,
     sendDeveloperData=True,
+    truncateFilePaths=False
   ):
   checkMostUpdatedVersion()
 
@@ -115,7 +116,8 @@ def uploadDataToC3Env (
     masterRefreshDataSwitch = masterRefreshDataSwitch,
     promptUsersForWarnings  = promptUsersForWarnings,
     sendDeveloperData       = sendDeveloperData,
-    outerAPICall            = 'uploadAPI'
+    outerAPICall            = 'uploadAPI',
+    truncateFilePaths       = truncateFilePaths
   )
 
   c3UsageStats.UploadAPI.logStart(environmentArguments, p)
@@ -142,6 +144,7 @@ def downloadDataFromC3Env (
     maxColumnPrintLength=None,
     promptUsersForWarnings=True,
     sendDeveloperData=True,
+    truncateFilePaths=False
   ):
   checkMostUpdatedVersion()
 
@@ -158,7 +161,8 @@ def downloadDataFromC3Env (
     masterDownloadDataSwitch = masterDownloadDataSwitch,
     promptUsersForWarnings   = promptUsersForWarnings,
     sendDeveloperData        = sendDeveloperData,
-    outerAPICall             = 'downloadAPI'
+    outerAPICall             = 'downloadAPI',
+    truncateFilePaths        = truncateFilePaths
   )
 
   c3UsageStats.DownloadAPI.logStart(environmentArguments, p)

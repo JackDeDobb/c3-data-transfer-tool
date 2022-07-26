@@ -98,6 +98,8 @@ def _fetchGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
       progressBar = IncrementalBar(''.join(result[:2]), max=len(fileUrls))
       for idx, fileUrl in enumerate(fileUrls):
         downloadFilePath = '/'.join([dataTypeFilesFolderPath, str(idx) + '.json.gz'])
+        if p.truncateFilePaths:
+          fileUrl = fileUrl.split(c3FileSystem.getRemoteRootURL(r,p))[1]
         fullFileURL = c3Request.generateFileURL(r, fileUrl)
         errorCodePrefix = 'Unsuccessful pulling ' + c3Type + ': ' + fullFileURL
         c3Request.downloadFileFromURL(r, p.errorSleepTimeSeconds, fullFileURL, downloadFilePath, okayToSkip404Error, errorCodePrefix)
