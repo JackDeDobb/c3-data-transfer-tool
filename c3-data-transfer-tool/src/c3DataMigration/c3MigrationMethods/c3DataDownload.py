@@ -120,9 +120,9 @@ def _extractGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
 
 def _cleanUpGeneratedExportFiles(r, p, c3TypeToBatchJobMapping):
   listOfListOfFileUrls = [x[1]['fileUrls'] for x in c3TypeToBatchJobMapping]
-  flattenedListFileUrls = reduce(lambda z, y : z + y, listOfListOfFileUrls)
-  c3FileSystem.deleteRemoteFiles(r, p, flattenedListFileUrls)
-
+  if not len(listOfListOfFileUrls) == 0:
+    flattenedListFileUrls = reduce(lambda z, y : z + y, listOfListOfFileUrls)
+    c3FileSystem.deleteRemoteFiles(r, p, flattenedListFileUrls)
 
 
 
