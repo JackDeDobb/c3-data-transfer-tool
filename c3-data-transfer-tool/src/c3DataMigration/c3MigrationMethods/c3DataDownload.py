@@ -6,6 +6,7 @@ __email__ = 'jackson.dedobbelaere@c3.ai'
 
 #!/usr/bin/env python3
 import xml.etree.ElementTree as ET
+import json
 from progress.bar import IncrementalBar
 from functools import reduce
 from c3DataMigration.c3Helpers import c3FileSystem
@@ -71,7 +72,7 @@ def _finishDataDownloadFromEnv(r, p, c3TypeToBatchJobMapping):
       errorCodePrefix = 'Unsuccessful retrieving files for export of type ' + c3TypeToBatchJob[0]
       request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
 
-      fileUrls = [x.text for x in ET.ElementTree(ET.fromstring(request.text)).getroot().findall('./filesResponse/v/url')]
+      fileUrls = [x['url'] for x in json.loads(request.text)]
       c3TypeToBatchJob[1]['fileUrls'] = fileUrls
 
 
@@ -97,6 +98,8 @@ def _fetchGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
       progressBar = IncrementalBar(''.join(result[:2]), max=len(fileUrls))
       for idx, fileUrl in enumerate(fileUrls):
         downloadFilePath = '/'.join([dataTypeFilesFolderPath, str(idx) + '.json.gz'])
+        if p.truncateFilePaths:
+          fileUrl = fileUrl.split(c3FileSystem.getRemoteRootURL(r,p))[1]
         fullFileURL = c3Request.generateFileURL(r, fileUrl)
         errorCodePrefix = 'Unsuccessful pulling ' + c3Type + ': ' + fullFileURL
         c3Request.downloadFileFromURL(r, p.errorSleepTimeSeconds, fullFileURL, downloadFilePath, okayToSkip404Error, errorCodePrefix)
@@ -117,9 +120,9 @@ def _extractGeneratedExportFiles (r, p, c3TypeToBatchJobMapping):
 
 def _cleanUpGeneratedExportFiles(r, p, c3TypeToBatchJobMapping):
   listOfListOfFileUrls = [x[1]['fileUrls'] for x in c3TypeToBatchJobMapping]
-  flattenedListFileUrls = reduce(lambda z, y : z + y, listOfListOfFileUrls)
-  c3FileSystem.deleteRemoteFiles(r, p, flattenedListFileUrls)
-
+  if not len(listOfListOfFileUrls) == 0:
+    flattenedListFileUrls = reduce(lambda z, y : z + y, listOfListOfFileUrls)
+    c3FileSystem.deleteRemoteFiles(r, p, flattenedListFileUrls)
 
 
 

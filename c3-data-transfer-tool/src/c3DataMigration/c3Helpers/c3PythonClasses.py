@@ -24,6 +24,7 @@ class APIParameters:
   sendDeveloperData:        bool = True
   initialTime:              datetime = datetime.now()
   outerAPICall:             str = ''
+  truncateFilePaths:         bool = False
 
   # Upload Specific
   dataTypeImports:          list = field(default_factory=list)

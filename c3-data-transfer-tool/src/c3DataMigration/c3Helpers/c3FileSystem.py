@@ -23,8 +23,7 @@ def getRemoteFileSystemInstance (r, p):
   url = c3Request.generateTypeActionURL(r, 'FileSystem', 'inst')
   errorCodePrefix = 'Unsuccessful retrieving instance of FileSystem'
   request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, None, errorCodePrefix)
-  fileSystemInstance = ET.ElementTree(ET.fromstring(request.text)).getroot().find('./type/name').text
-
+  fileSystemInstance = json.loads(request.text)['type']
   return fileSystemInstance
 
 
@@ -37,8 +36,7 @@ def getRemoteRootURL (r, p):
   }
   errorCodePrefix = 'Unsuccessful root url of FileSystem'
   request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
-  rootURL = c3Request.parseXMLValueFromString(request.text, 'rootUrlResponse')
-
+  rootURL = request.text.strip("\"")
   return rootURL
 
 
@@ -46,7 +44,9 @@ def getRemoteRootURL (r, p):
 def getRemoteImportDirectory (r, p):
   remoteFileSystemRoot = getRemoteRootURL(r, p)
   scriptRunnerUsername = c3UtilityMethods.getc3Context(r, p.errorSleepTimeSeconds)['username']
-  directoryOnEnv = '/'.join([remoteFileSystemRoot, 'c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
+  directoryOnEnv = '/'.join([ 'c3-cp', 'jack-data-transfer', scriptRunnerUsername]) # TODO: May also want to key off timestamp
+  if not p.truncateFilePaths:
+    directoryOnEnv = '/'.join([remoteFileSystemRoot, directoryOnEnv]) # TODO: May also want to key off timestamp
 
   return directoryOnEnv
 
@@ -62,8 +62,8 @@ def deleteRemoteDirectory (r, p, folderPath):
     'confirm': True,
   }
   errorCodePrefix = 'Unsuccessful cleaning up deleting folder on environment'
-  c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
-
+  request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  return request
 
 
 
@@ -75,8 +75,8 @@ def deleteRemoteFiles (r, p, filePathList):
     'files': filePathList,
   }
   errorCodePrefix = 'Unsuccessful cleaning up generated files on environment'
-  c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
-
+  request = c3Request.makeRequest(r, p.errorSleepTimeSeconds, url, payload, errorCodePrefix)
+  return request
 
 
 

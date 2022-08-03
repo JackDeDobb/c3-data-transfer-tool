@@ -42,7 +42,7 @@ def _refreshAuthToken (r):
     url = generateTypeActionURL(r, 'Authenticator', 'generateC3AuthToken')
     retVal = None
     if (r.authToken):
-      headers = { 'Content-type': 'application/json', 'Authorization': r.authToken }
+      headers = { 'Content-type': 'application/json', 'Authorization': r.authToken, 'Accept': 'application/json'  }
       retVal = requests.post(url=url, headers=headers)
     elif (r.user and r.password):
       headers = { 'Content-type': 'application/json', 'Accept': 'application/json' }
@@ -56,7 +56,7 @@ def _refreshAuthToken (r):
 def _makeRequestHelper (r, url, payload):
   retVal = None
   if (r.authToken):
-    headers = { 'Content-type': 'application/json', 'Authorization': r.authToken }
+    headers = { 'Content-type': 'application/json', 'Authorization': r.authToken, 'Accept': 'application/json' }
     if (payload == None):
       retVal = requests.post(url=url, headers=headers)
     else:
@@ -124,7 +124,9 @@ def uploadFileToURL (r, errorSleepTimeSeconds, fullFileURL, uploadFilePath, erro
     cookies = {
       'c3auth': r.authToken
     }
-    return requests.post(fullFileURL, data=file, stream=True, cookies=cookies)
+    request = requests.post(fullFileURL, data=file, stream=True, cookies=cookies)
+    return request
+  
 
   file = open(uploadFilePath, 'rb')
   fileRequest = createFileRequest(file)
