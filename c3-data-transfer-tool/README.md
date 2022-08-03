@@ -21,7 +21,8 @@ Note: We have 2 step process for transferring data:
         * downloadData: upload data for this type to the env.
         * refreshCalcFields: refresh calc fields for this type on env.
         * numRecordsPerFile = 2000: number of files to split records into, also the number of map-reduce jobs.
-        * filter = '1 == 1': filter on C3 type for which records to extract.
+        * filter = '': filter on C3 type for which records to extract.
+        * include = 'this': include on C3 type for which records to extract. Also, see stripMetadataAndDerived toggle.
     * dataDownloadFolder: filePath to where to download the exported files to.
     * errorOutputFolder = dataDownloadFolder + '_Errors': filePath to where refreshCalc errors are stored.
     * errorSleepTimeSeconds = 15: time to sleep when request fails before retrying.
