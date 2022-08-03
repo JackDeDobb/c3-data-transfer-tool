@@ -100,7 +100,8 @@ class APIParameters:
         'downloadData':      { 'type': bool, 'required': True,  'defaultValue': None     },
         'refreshCalcFields': { 'type': bool, 'required': True,  'defaultValue': None     },
         'numRecordsPerFile': { 'type': int,  'required': False, 'defaultValue': 2000     },
-        'filter':            { 'type': str,  'required': False, 'defaultValue': '1 == 1' },
+        'filter':            { 'type': str,  'required': False, 'defaultValue': ''       },
+        'include':           { 'type': str,  'required': False, 'defaultValue': 'this'   },
       }
       for fieldToCheck, fieldParams in fieldsToCheck.items():
         assert(self._validateAndAssignFieldInDict(dataTypeConfig, fieldToCheck, fieldParams))

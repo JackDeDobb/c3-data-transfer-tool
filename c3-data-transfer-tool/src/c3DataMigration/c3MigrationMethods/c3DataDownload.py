@@ -37,7 +37,7 @@ def _startDataDownloadFromEnv(r, p):
       'spec': {
         'targetType':                 c3Type,
         'contentType':                'json',
-        'jsonInclude':                'this',
+        'jsonInclude':                dataTypeExport[1]['include'],
         'filter':                     dataTypeExport[1]['filter'],
         'fileUrlOrEncodedPathPrefix': '/'.join(['c3-cp/exports', scriptRunnerUsername, c3Type]),
         'failIfUrlNotEmpty':          False,
